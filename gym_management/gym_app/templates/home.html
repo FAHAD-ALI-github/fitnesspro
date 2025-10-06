@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Home - Gym Management System{% endblock %}
+{% block content %}
+<h1>Welcome to Gym Management System</h1>
+<p>Please select your login type:</p>
+<a href="/user_login" class="btn">Member Login</a>
+<a href="/trainer_login" class="btn">Trainer Login</a>
+<a href="/admin_login" class="btn">Admin Login</a>
+<p style="margin-top: 2rem;">New member? <a href="/new_registration">Register Here</a></p>
+{% endblock %}

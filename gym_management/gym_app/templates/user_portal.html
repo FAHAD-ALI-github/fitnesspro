@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block title %}User Portal{% endblock %}
+{% block content %}
+<style>
+    .plan-card {
+        border: 1px solid #ddd;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .week-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+    }
+    .week-table th, .week-table td {
+        border: 1px solid #ddd;
+        padding: 0.75rem;
+        text-align: left;
+    }
+    .week-table th {
+        background: #4CAF50;
+        color: white;
+        font-weight: bold;
+    }
+    .week-table tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+    .info-box {
+        background: #e8f5e9;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border-left: 4px solid #4CAF50;
+    }
+    .warning-box {
+        background: #fff3e0;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        border-left: 4px solid #ff9800;
+    }
+</style>
+
+<h1>Welcome, {{ user.first_name }} {{ user.last_name }}</h1>
+
+{% if not user.is_approved %}
+<div class="warning-box">
+    Admin is approving your payment. Within 24 hours this warning will be removed.
+</div>
+{% endif %}
+
+<h2>Personal Information</h2>
+<form method="POST" action="/update_user_info">
+    {% csrf_token %}
+    <input type="email" name="email" value="{{ user.email }}" placeholder="Email">
+    <input type="text" name="phone_number" value="{{ user.phone_number }}" placeholder="Phone">
+    <input type="number" name="weight" value="{{ user.weight }}" placeholder="Weight (kg)">
+    <input type="number" name="height" value="{{ user.height }}" placeholder="Height (cm)">
+    <button type="submit" class="btn">Update Info</button>
+</form>
+
+{% if bmi %}
+<div class="info-box">
+    <p><strong>BMI:</strong> {{ bmi }} - {{ bmi_status }}</p>
+</div>
+{% endif %}
+
+<h2>My Trainer</h2>
+{% if user.assigned_trainer %}
+<div class="info-box">
+    <p><strong>Trainer:</strong> {{ user.assigned_trainer.first_name }} {{ user.assigned_trainer.last_name }}</p>
+    {% if user.assigned_trainer.specialization %}
+    <p><strong>Specialization:</strong> {{ user.assigned_trainer.specialization }}</p>
+    {% endif %}
+</div>
+{% elif user.trainer_requested %}
+<p style="color: orange;">Trainer request pending...</p>
+{% else %}
+<a href="/request_trainer" class="btn">Get a Trainer</a>
+{% endif %}
+
+<h2>My Workout Plan</h2>
+{% if user.assigned_workout_plan %}
+<div class="plan-card">
+    <h3>{{ user.assigned_workout_plan.name }} ({{ user.assigned_workout_plan.difficulty_level|capfirst }})</h3>
+    <p>{{ user.assigned_workout_plan.description }}</p>
+    
+    <table class="week-table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Exercises</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in user.assigned_workout_plan.workout_days.all %}
+            <tr>
+                <td><strong>{{ day.day_name }}</strong></td>
+                <td style="white-space: pre-line;">{{ day.exercises }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="text-align: center; color: #999;">No workout schedule available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No workout plan assigned yet</p>
+{% endif %}
+
+<h2>My Diet Plan</h2>
+{% if user.assigned_diet_plan %}
+<div class="plan-card">
+    <h3>{{ user.assigned_diet_plan.name }}{% if user.assigned_diet_plan.total_calories %} ({{ user.assigned_diet_plan.total_calories }} cal/day){% endif %}</h3>
+    <p>{{ user.assigned_diet_plan.description }}</p>
+    
+    <table class="week-table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Breakfast</th>
+                <th>Lunch</th>
+                <th>Dinner</th>
+                <th>Snacks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in user.assigned_diet_plan.diet_days.all %}
+            <tr>
+                <td><strong>{{ day.day_name }}</strong></td>
+                <td>{{ day.breakfast }}</td>
+                <td>{{ day.lunch }}</td>
+                <td>{{ day.dinner }}</td>
+                <td>{{ day.snacks|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #999;">No meal schedule available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p>No diet plan assigned yet</p>
+{% endif %}
+
+<h2>All Available Workout Plans</h2>
+{% for plan in all_workout_plans %}
+<div class="plan-card">
+    <h3>{{ plan.name }} ({{ plan.difficulty_level|capfirst }})</h3>
+    <p>{{ plan.description }}</p>
+    <p><em>By: {{ plan.trainer.first_name }} {{ plan.trainer.last_name }}</em></p>
+    
+    <table class="week-table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Exercises</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in plan.workout_days.all %}
+            <tr>
+                <td><strong>{{ day.day_name }}</strong></td>
+                <td style="white-space: pre-line;">{{ day.exercises }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% empty %}
+<p style="color: #999;">No workout plans available yet</p>
+{% endfor %}
+
+<h2>All Available Diet Plans</h2>
+{% for plan in all_diet_plans %}
+<div class="plan-card">
+    <h3>{{ plan.name }}{% if plan.total_calories %} ({{ plan.total_calories }} cal/day){% endif %}</h3>
+    <p>{{ plan.description }}</p>
+    <p><em>By: {{ plan.trainer.first_name }} {{ plan.trainer.last_name }}</em></p>
+    
+    <table class="week-table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Breakfast</th>
+                <th>Lunch</th>
+                <th>Dinner</th>
+                <th>Snacks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in plan.diet_days.all %}
+            <tr>
+                <td><strong>{{ day.day_name }}</strong></td>
+                <td>{{ day.breakfast }}</td>
+                <td>{{ day.lunch }}</td>
+                <td>{{ day.dinner }}</td>
+                <td>{{ day.snacks|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% empty %}
+<p style="color: #999;">No diet plans available yet</p>
+{% endfor %}
+{% endblock %}

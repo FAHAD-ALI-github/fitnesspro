@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Trainer Portal{% endblock %}
+{% block content %}
+<style>
+    .day-input {
+        background: #f9f9f9;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+    .day-input h4 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    .plan-card {
+        border: 1px solid #ddd;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        background: white;
+    }
+    .week-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+    }
+    .week-table th, .week-table td {
+        border: 1px solid #ddd;
+        padding: 0.75rem;
+        text-align: left;
+    }
+    .week-table th {
+        background: #4CAF50;
+        color: white;
+        font-weight: bold;
+    }
+    .week-table tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+</style>
+
+<h1>Welcome, {{ trainer.first_name }} {{ trainer.last_name }}</h1>
+
+<h2>Create Workout Plan</h2>
+<form method="POST" action="/create_workout_plan">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Workout Plan Name" required>
+    <textarea name="description" placeholder="Description" rows="3" required></textarea>
+    <select name="difficulty_level" required>
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="advanced">Advanced</option>
+    </select>
+    
+    <h3>Weekly Workout Schedule</h3>
+    <p style="color: #666; font-size: 0.9rem;">Enter exercises for each day (one per line with sets/reps, e.g., "Bench Press - 4 sets x 10 reps")</p>
+    {% for day in days_of_week %}
+    <div class="day-input">
+        <h4>{{ day }}</h4>
+        <textarea name="exercises_{{ day }}" placeholder="Exercises for {{ day }} (leave blank for rest day)" rows="4" style="width: 100%;"></textarea>
+        <input type="text" name="notes_{{ day }}" placeholder="Notes (optional)" style="width: 100%;">
+    </div>
+    {% endfor %}
+    
+    <button type="submit" class="btn">Create Workout Plan</button>
+</form>
+
+<h2>Create Diet Plan</h2>
+<form method="POST" action="/create_diet_plan">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Diet Plan Name" required>
+    <textarea name="description" placeholder="Description" rows="3" required></textarea>
+    <input type="number" name="total_calories" placeholder="Total Daily Calories (optional)">
+    
+    <h3>Weekly Meal Schedule</h3>
+    <p style="color: #666; font-size: 0.9rem;">Enter meals for each day</p>
+    {% for day in days_of_week %}
+    <div class="day-input">
+        <h4>{{ day }}</h4>
+        <input type="text" name="breakfast_{{ day }}" placeholder="Breakfast" required style="width: 100%; margin-bottom: 0.5rem;">
+        <input type="text" name="lunch_{{ day }}" placeholder="Lunch" required style="width: 100%; margin-bottom: 0.5rem;">
+        <input type="text" name="dinner_{{ day }}" placeholder="Dinner" required style="width: 100%; margin-bottom: 0.5rem;">
+        <input type="text" name="snacks_{{ day }}" placeholder="Snacks (optional)" style="width: 100%;">
+    </div>
+    {% endfor %}
+    
+    <button type="submit" class="btn">Create Diet Plan</button>
+</form>
+
+<h2>My Workout Plans</h2>
+{% for plan in workout_plans %}
+<div class="plan-card">
+    <h3>{{ plan.name }} ({{ plan.difficulty_level|capfirst }})</h3>
+    <p>{{ plan.description }}</p>
+    
+    <table class="week-table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Exercises</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in plan.workout_days.all %}
+            <tr>
+                <td><strong>{{ day.day_name }}</strong></td>
+                <td style="white-space: pre-line;">{{ day.exercises }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="text-align: center; color: #999;">No workout days added</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% empty %}
+<p style="color: #999;">No workout plans created yet</p>
+{% endfor %}
+
+<h2>My Diet Plans</h2>
+{% for plan in diet_plans %}
+<div class="plan-card">
+    <h3>{{ plan.name }}{% if plan.total_calories %} ({{ plan.total_calories }} cal/day){% endif %}</h3>
+    <p>{{ plan.description }}</p>
+    
+    <table class="week-table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Breakfast</th>
+                <th>Lunch</th>
+                <th>Dinner</th>
+                <th>Snacks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in plan.diet_days.all %}
+            <tr>
+                <td><strong>{{ day.day_name }}</strong></td>
+                <td>{{ day.breakfast }}</td>
+                <td>{{ day.lunch }}</td>
+                <td>{{ day.dinner }}</td>
+                <td>{{ day.snacks|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #999;">No diet days added</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% empty %}
+<p style="color: #999;">No diet plans created yet</p>
+{% endfor %}
+
+<h2>Assign Plans to Members</h2>
+<form method="POST" action="/assign_plan_to_member">
+    {% csrf_token %}
+    <select name="member_id" required>
+        <option value="">Select Member</option>
+        {% for member in assigned_members %}
+        <option value="{{ member.id }}">{{ member.first_name }} {{ member.last_name }}</option>
+        {% endfor %}
+    </select>
+    <select name="workout_plan_id">
+        <option value="">Select Workout Plan (optional)</option>
+        {% for plan in workout_plans %}
+        <option value="{{ plan.id }}">{{ plan.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="diet_plan_id">
+        <option value="">Select Diet Plan (optional)</option>
+        {% for plan in diet_plans %}
+        <option value="{{ plan.id }}">{{ plan.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn">Assign Plans</button>
+</form>
+{% endblock %}
