@@ -2,16 +2,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
-from django.db.models import Q, Count
-from .models import *
-import datetime
-from datetime import timedelta
+from django.db.models import Q
 from collections import defaultdict
+from datetime import timedelta, datetime, date
 import json
-from datetime import date
+import datetime as dt
 
+from .models import (
+    Gym_user, Trainer, WorkoutPlan, WorkoutDay,
+    DietPlan, DietDay, TrainerAttendance, MembershipPlan, Gender
+)
 
-
+# ----------------- CONSTANTS -----------------
 ADMIN_CREDENTIALS = {
     'username': 'admin',
     'password': 'admin123',
@@ -23,9 +25,13 @@ ADMIN_CREDENTIALS = {
 
 DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
+
+# ----------------- HOME -----------------
 def home(request):
     return render(request, 'home.html')
 
+
+# ----------------- LOGIN & AUTH -----------------
 def user_login(request):
     data = {}
     if request.method == "POST":
@@ -33,27 +39,24 @@ def user_login(request):
         password = request.POST.get("u_password")
         user_data = Gym_user.get_user_by_username(username)
         
-        if user_data:
-            if check_password(password, user_data.password):
-                if not user_data.is_approved:
-                    data["error"] = "Your account is pending admin approval."
-                elif user_data.membership_end_date and user_data.membership_end_date < datetime.date.today():
-                    if not user_data.is_blocked:
-                        user_data.is_blocked = True
-                        user_data.save()
-                    data["error"] = "Your membership has expired! Please renew your membership to continue."
-                elif user_data.is_blocked:
-                    data["error"] = "Your membership has expired! Please renew your membership to continue."
-                else:
-                    request.session['user_id'] = user_data.id
-                    request.session['user_type'] = 'member'
-                    return redirect('/user_portal')
+        if user_data and check_password(password, user_data.password):
+            if not user_data.is_approved:
+                data["error"] = "Your account is pending admin approval."
+            elif user_data.membership_end_date and user_data.membership_end_date < dt.date.today():
+                user_data.is_blocked = True
+                user_data.save()
+                data["error"] = "Your membership has expired! Please renew your membership."
+            elif user_data.is_blocked:
+                data["error"] = "Your membership has expired! Please renew your membership."
             else:
-                data["error"] = "Password is incorrect!"
+                request.session['user_id'] = user_data.id
+                request.session['user_type'] = 'member'
+                return redirect('/user_portal')
         else:
-            data["error"] = "Incorrect username or password!"
+            data["error"] = "Invalid username or password!"
     
     return render(request, 'user_login.html', data)
+
 
 def trainer_login(request):
     data = {}
@@ -62,17 +65,15 @@ def trainer_login(request):
         password = request.POST.get("t_password")
         trainer_data = Trainer.get_trainer_by_username(username)
         
-        if trainer_data:
-            if check_password(password, trainer_data.password):
-                request.session['trainer_id'] = trainer_data.id
-                request.session['user_type'] = 'trainer'
-                return redirect('/trainer_portal')
-            else:
-                data["error"] = "Password is incorrect!"
+        if trainer_data and check_password(password, trainer_data.password):
+            request.session['trainer_id'] = trainer_data.id
+            request.session['user_type'] = 'trainer'
+            return redirect('/trainer/dashboard')
         else:
-            data["error"] = "Incorrect username or password!"
+            data["error"] = "Invalid username or password!"
     
     return render(request, 'trainer_login.html', data)
+
 
 def admin_login(request):
     data = {}
@@ -85,76 +86,71 @@ def admin_login(request):
             request.session['user_type'] = 'admin'
             return redirect('/admin_portal')
         else:
-            data["error"] = "Incorrect username or password!"
+            data["error"] = "Invalid admin credentials!"
     
     return render(request, 'admin_login.html', data)
+
 
 def logout(request):
     request.session.flush()
     return redirect('/')
 
+
+# ----------------- REGISTRATION -----------------
 def new_registration(request):
     data = {}
-    membership_plans = MembershipPlan.objects.all()
-    genders = Gender.objects.all()
-    data['membership_plans'] = membership_plans
-    data['genders'] = genders
-    
+    data['membership_plans'] = MembershipPlan.objects.all()
+    data['genders'] = Gender.objects.all()
+
     if request.method == "POST":
         first_name = request.POST.get("firstname")
         last_name = request.POST.get("lastname")
-        dob = request.POST.get("dob")
-        phone_number = request.POST.get("phone_number")
         username = request.POST.get("username")
         password = request.POST.get("password")
         c_password = request.POST.get("c_password")
-        gender_id = request.POST.get("gender")
         email = request.POST.get("email")
+        phone_number = request.POST.get("phone_number")
+        dob = request.POST.get("dob")
+        gender_id = request.POST.get("gender")
         membership_plan_id = request.POST.get("membership_plan")
         payment_proof = request.FILES.get("payment_proof")
-        
-        error = ""
-        
-        if len(first_name) < 2 or len(last_name) < 2 or len(username) < 2:
-            error = "Name and username fields cannot be empty"
-        elif len(password) < 5:
-            error = "Password length should be at least 5 characters"
+
+        if not all([first_name, last_name, username, password, c_password, email]):
+            data["error"] = "All fields are required!"
         elif password != c_password:
-            error = "Both passwords should match"
+            data["error"] = "Passwords do not match!"
         elif Gym_user.get_user_by_username(username):
-            error = "Username already exists"
-        elif not payment_proof:
-            error = "Please upload payment proof"
+            data["error"] = "Username already exists!"
         else:
-            user = Gym_user()
-            user.first_name = first_name.strip()
-            user.last_name = last_name.strip()
-            user.dob = dob
-            user.phone_number = phone_number
-            user.username = username.strip()
-            user.password = make_password(password)
-            user.email = email
-            user.gender_id = gender_id
-            user.membership_plan_id = membership_plan_id
-            user.payment_proof = payment_proof
-            user.is_approved = False
+            user = Gym_user(
+                first_name=first_name.strip(),
+                last_name=last_name.strip(),
+                dob=dob,
+                phone_number=phone_number,
+                username=username.strip(),
+                password=make_password(password),
+                email=email,
+                gender_id=gender_id,
+                membership_plan_id=membership_plan_id,
+                payment_proof=payment_proof,
+                is_approved=False
+            )
             user.save()
-            
-            data["msg"] = "Registration successful! Please wait for admin approval (within 24 hours)."
+            data["msg"] = "Registration successful! Awaiting admin approval."
             data["success"] = True
-        
-        data["error"] = error
-    
+
     return render(request, 'new_registration.html', data)
 
+
+# ----------------- USER PORTAL -----------------
 def user_portal(request):
     if 'user_id' not in request.session:
         return redirect('/user_login')
-    
+
     user = Gym_user.get_user_by_id(request.session['user_id'])
-    
     bmi = None
     bmi_status = None
+
     if user.height and user.weight:
         height_m = user.height / 100
         bmi = round(user.weight / (height_m ** 2), 2)
@@ -166,34 +162,31 @@ def user_portal(request):
             bmi_status = "Overweight"
         else:
             bmi_status = "Obese"
-    
-    all_workout_plans = WorkoutPlan.objects.all()
-    all_diet_plans = DietPlan.objects.all()
-    
+
     data = {
         'user': user,
         'bmi': bmi,
         'bmi_status': bmi_status,
-        'all_workout_plans': all_workout_plans,
-        'all_diet_plans': all_diet_plans
+        'all_workout_plans': WorkoutPlan.objects.all(),
+        'all_diet_plans': DietPlan.objects.all()
     }
-    
     return render(request, 'user_portal.html', data)
+
 
 def request_trainer(request):
     if 'user_id' not in request.session:
         return redirect('/user_login')
-    
+
     user = Gym_user.get_user_by_id(request.session['user_id'])
     user.trainer_requested = True
     user.save()
-    
     return redirect('/user_portal')
+
 
 def update_user_info(request):
     if 'user_id' not in request.session:
         return redirect('/user_login')
-    
+
     if request.method == "POST":
         user = Gym_user.get_user_by_id(request.session['user_id'])
         user.email = request.POST.get("email", user.email)
@@ -201,71 +194,97 @@ def update_user_info(request):
         user.weight = request.POST.get("weight", user.weight)
         user.height = request.POST.get("height", user.height)
         user.save()
-    
+
     return redirect('/user_portal')
 
-def trainer_portal(request):
+
+# ----------------- TRAINER SECTION -----------------
+def trainer_dashboard(request):
     if 'trainer_id' not in request.session:
         return redirect('/trainer_login')
-    
+
     trainer = Trainer.objects.get(id=request.session['trainer_id'])
-    workout_plans = WorkoutPlan.objects.filter(trainer=trainer).prefetch_related('workout_days')
-    diet_plans = DietPlan.objects.filter(trainer=trainer).prefetch_related('diet_days')
-    assigned_members = Gym_user.objects.filter(assigned_trainer=trainer)
-    
+    total_clients = Gym_user.objects.filter(assigned_trainer=trainer).count()
+    total_workouts = WorkoutPlan.objects.filter(trainer=trainer).count()
+    total_diets = DietPlan.objects.filter(trainer=trainer).count()
+
     data = {
         'trainer': trainer,
-        'workout_plans': workout_plans,
-        'diet_plans': diet_plans,
-        'assigned_members': assigned_members,
-        'days_of_week': DAYS_OF_WEEK
+        'total_clients': total_clients,
+        'total_workouts': total_workouts,
+        'total_diets': total_diets
     }
-    
-    return render(request, 'trainer_portal.html', data)
+    return render(request, 'trainer/dashboard.html', data)
+
+
+def trainer_clients(request):
+    if 'trainer_id' not in request.session:
+        return redirect('/trainer_login')
+
+    trainer = Trainer.objects.get(id=request.session['trainer_id'])
+    query = request.GET.get('q', '')
+    members = Gym_user.objects.filter(assigned_trainer=trainer)
+
+    if query:
+        members = members.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(username__icontains=query)
+        )
+
+    context = {
+        'trainer': trainer,
+        'members': members,
+        'workout_plans': WorkoutPlan.objects.filter(trainer=trainer),
+        'diet_plans': DietPlan.objects.filter(trainer=trainer),
+        'query': query
+    }
+    return render(request, 'trainer/client_management.html', context)
+
 
 def create_workout_plan(request):
     if 'trainer_id' not in request.session:
         return redirect('/trainer_login')
-    
+
+    trainer = Trainer.objects.get(id=request.session['trainer_id'])
+
     if request.method == "POST":
-        trainer = Trainer.objects.get(id=request.session['trainer_id'])
-        
-        workout = WorkoutPlan()
-        workout.trainer = trainer
-        workout.name = request.POST.get("name")
-        workout.description = request.POST.get("description")
-        workout.difficulty_level = request.POST.get("difficulty_level")
-        workout.save()
-        
+        workout = WorkoutPlan.objects.create(
+            trainer=trainer,
+            name=request.POST.get("name"),
+            description=request.POST.get("description"),
+            difficulty_level=request.POST.get("difficulty_level")
+        )
         for day in DAYS_OF_WEEK:
             exercises = request.POST.get(f"exercises_{day}")
-            if exercises and exercises.strip():
+            if exercises:
                 WorkoutDay.objects.create(
                     workout_plan=workout,
                     day_name=day,
                     exercises=exercises,
                     notes=request.POST.get(f"notes_{day}", "")
                 )
-    
-    return redirect('/trainer_portal')
+        return redirect('/trainer/my_workout_plans')
+
+    return render(request, 'trainer/create_workout_plan.html', {'trainer': trainer, 'days_of_week': DAYS_OF_WEEK})
+
 
 def create_diet_plan(request):
     if 'trainer_id' not in request.session:
         return redirect('/trainer_login')
-    
+
+    trainer = Trainer.objects.get(id=request.session['trainer_id'])
+
     if request.method == "POST":
-        trainer = Trainer.objects.get(id=request.session['trainer_id'])
-        
-        diet = DietPlan()
-        diet.trainer = trainer
-        diet.name = request.POST.get("name")
-        diet.description = request.POST.get("description")
-        diet.total_calories = request.POST.get("total_calories")
-        diet.save()
-        
+        diet = DietPlan.objects.create(
+            trainer=trainer,
+            name=request.POST.get("name"),
+            description=request.POST.get("description"),
+            total_calories=request.POST.get("total_calories")
+        )
         for day in DAYS_OF_WEEK:
             breakfast = request.POST.get(f"breakfast_{day}")
-            if breakfast and breakfast.strip():
+            if breakfast:
                 DietDay.objects.create(
                     diet_plan=diet,
                     day_name=day,
@@ -274,32 +293,75 @@ def create_diet_plan(request):
                     dinner=request.POST.get(f"dinner_{day}", ""),
                     snacks=request.POST.get(f"snacks_{day}", "")
                 )
-    
-    return redirect('/trainer_portal')
+        return redirect('/trainer/my_diet_plans')
+
+    return render(request, 'trainer/create_diet_plan.html', {'trainer': trainer, 'days_of_week': DAYS_OF_WEEK})
+
+
+def trainer_workout_plans(request):
+    if 'trainer_id' not in request.session:
+        return redirect('/trainer_login')
+
+    trainer = Trainer.objects.get(id=request.session['trainer_id'])
+    plans = WorkoutPlan.objects.filter(trainer=trainer)
+    return render(request, 'trainer/my_workout_plans.html', {'trainer': trainer, 'workout_plans': plans})
+
+
+def trainer_diet_plans(request):
+    if 'trainer_id' not in request.session:
+        return redirect('/trainer_login')
+
+    trainer = Trainer.objects.get(id=request.session['trainer_id'])
+    plans = DietPlan.objects.filter(trainer=trainer)
+    return render(request, 'trainer/my_diet_plans.html', {'trainer': trainer, 'diet_plans': plans})
+
 
 def assign_plan_to_member(request):
     if 'trainer_id' not in request.session:
         return redirect('/trainer_login')
-    
+
     if request.method == "POST":
         member_id = request.POST.get("member_id")
         workout_plan_id = request.POST.get("workout_plan_id")
         diet_plan_id = request.POST.get("diet_plan_id")
-        
-        if member_id:
-            try:
-                member = Gym_user.objects.get(id=member_id)
-                
-                if workout_plan_id:
-                    member.assigned_workout_plan_id = workout_plan_id
-                if diet_plan_id:
-                    member.assigned_diet_plan_id = diet_plan_id
-                
-                member.save()
-            except Gym_user.DoesNotExist:
-                pass
-    
-    return redirect('/trainer_portal')
+
+        member = Gym_user.objects.filter(id=member_id).first()
+        if member:
+            if workout_plan_id:
+                member.assigned_workout_plan_id = workout_plan_id
+            if diet_plan_id:
+                member.assigned_diet_plan_id = diet_plan_id
+            member.save()
+    return redirect('/trainer/clients')
+def workout_plan_detail(request, plan_id):
+    if 'trainer_id' not in request.session:
+        return redirect('/trainer_login')
+
+    trainer = get_object_or_404(Trainer, id=request.session['trainer_id'])
+    workout_plan = get_object_or_404(WorkoutPlan, id=plan_id, trainer=trainer)
+    workout_days = WorkoutDay.objects.filter(workout_plan=workout_plan)
+
+    return render(request, 'trainer/workout_plan_detail.html', {
+        'trainer': trainer,  # ✅ add this
+        'workout_plan': workout_plan,
+        'workout_days': workout_days
+    })
+
+
+def diet_plan_detail(request, plan_id):
+    if 'trainer_id' not in request.session:
+        return redirect('/trainer_login')
+
+    trainer = get_object_or_404(Trainer, id=request.session['trainer_id'])
+    diet_plan = get_object_or_404(DietPlan, id=plan_id, trainer=trainer)
+    diet_days = DietDay.objects.filter(diet_plan=diet_plan)
+
+    return render(request, 'trainer/diet_plan_detail.html', {
+        'trainer': trainer,  # ✅ add this
+        'diet_plan': diet_plan,
+        'diet_days': diet_days
+    })
+
 
 # ADMIN VIEWS
 

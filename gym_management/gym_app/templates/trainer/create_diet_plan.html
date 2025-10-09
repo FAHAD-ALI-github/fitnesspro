@@ -1,0 +1,29 @@
+{% extends 'base_trainer.html' %}
+{% block title %}Create Diet Plan{% endblock %}
+{% block content %}
+<h2 class="gradient-text mb-4">Create a New Diet Plan</h2>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label class="form-label">Plan Name</label>
+    <input type="text" name="name" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea name="description" class="form-control" rows="3"></textarea>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Total Calories (optional)</label>
+    <input type="number" name="total_calories" class="form-control">
+  </div>
+  <hr>
+  {% for day in days_of_week %}
+  <h5>{{ day }}</h5>
+  <textarea name="breakfast_{{ day }}" class="form-control mb-2" placeholder="Breakfast"></textarea>
+  <textarea name="lunch_{{ day }}" class="form-control mb-2" placeholder="Lunch"></textarea>
+  <textarea name="dinner_{{ day }}" class="form-control mb-2" placeholder="Dinner"></textarea>
+  <textarea name="snacks_{{ day }}" class="form-control mb-4" placeholder="Snacks (optional)"></textarea>
+  {% endfor %}
+  <button class="btn btn-primary">Save Diet Plan</button>
+</form>
+{% endblock %}

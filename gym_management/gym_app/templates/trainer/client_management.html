@@ -1,0 +1,61 @@
+{% extends 'base_trainer.html' %}
+{% block title %}Client Management{% endblock %}
+{% block content %}
+<h2 class="gradient-text mb-4">Client Management</h2>
+
+<form method="get" class="mb-4">
+  <div class="input-group">
+    <input type="text" class="form-control" name="q" placeholder="Search member by name or username" value="{{ query }}">
+    <button class="btn btn-primary" type="submit">Search</button>
+  </div>
+</form>
+
+{% if members %}
+<div class="table-responsive">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Profile</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Workout Plan</th>
+        <th>Diet Plan</th>
+        <th>Assign Plans</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in members %}
+      <tr>
+        <td><img src="{{ m.image.url }}" width="50" class="rounded-circle"></td>
+        <td>{{ m.first_name }} {{ m.last_name }}</td>
+        <td>{{ m.username }}</td>
+        <td>{{ m.assigned_workout_plan.name|default:"Not Assigned" }}</td>
+        <td>{{ m.assigned_diet_plan.name|default:"Not Assigned" }}</td>
+        <td>
+          <form method="post" action="{% url 'assign_plan_to_member' %}">
+            {% csrf_token %}
+            <input type="hidden" name="member_id" value="{{ m.id }}">
+            <select name="workout_plan_id" class="form-select form-select-sm mb-2">
+              <option value="">Select Workout</option>
+              {% for wp in workout_plans %}
+                <option value="{{ wp.id }}">{{ wp.name }}</option>
+              {% endfor %}
+            </select>
+            <select name="diet_plan_id" class="form-select form-select-sm mb-2">
+              <option value="">Select Diet</option>
+              {% for dp in diet_plans %}
+                <option value="{{ dp.id }}">{{ dp.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-success btn-sm">Assign</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>No members found.</p>
+{% endif %}
+{% endblock %}
