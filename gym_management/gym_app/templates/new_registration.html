@@ -705,12 +705,7 @@
                 </div>
                 {% endif %}
 
-                {% if success %}
-                <div class="alert alert-success" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>Registration successful! You can now <a href="/user_login" style="color: var(--accent-success); text-decoration: underline;">login here</a>
-                </div>
-                {% else %}
-
+                {% if not success %}
                 <form method="POST" enctype="multipart/form-data" id="registrationForm" novalidate>
                     {% csrf_token %}
                     

@@ -4,9 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
 from django.db.models import Q
 from collections import defaultdict
-from datetime import timedelta, datetime, date
-import json
 import datetime as dt
+import json
 
 from .models import (
     Gym_user, Trainer, WorkoutPlan, WorkoutDay,
@@ -114,6 +113,9 @@ def new_registration(request):
         gender_id = request.POST.get("gender")
         membership_plan_id = request.POST.get("membership_plan")
         payment_proof = request.FILES.get("payment_proof")
+
+        # Keep all form data in context so we can refill fields if error occurs
+        data["form_data"] = request.POST  
 
         if not all([first_name, last_name, username, password, c_password, email]):
             data["error"] = "All fields are required!"
@@ -333,6 +335,8 @@ def assign_plan_to_member(request):
                 member.assigned_diet_plan_id = diet_plan_id
             member.save()
     return redirect('/trainer/clients')
+
+
 def workout_plan_detail(request, plan_id):
     if 'trainer_id' not in request.session:
         return redirect('/trainer_login')
@@ -364,7 +368,6 @@ def diet_plan_detail(request, plan_id):
 
 
 # ADMIN VIEWS
-
 def admin_portal(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
@@ -390,10 +393,11 @@ def admin_portal(request):
         'trainer_request_count': trainer_request_count,
         'total_members': all_members.count(),
         'total_trainers': all_trainers.count(),
-        'today': datetime.date.today()
+        'today': dt.date.today()
     }
     
     return render(request, 'admin/dashboard.html', data)
+
 
 def approve_payment(request, user_id):
     if 'admin_logged_in' not in request.session:
@@ -403,11 +407,12 @@ def approve_payment(request, user_id):
     user.is_approved = True
     user.is_blocked = False
     user.reminder_sent = False
-    user.membership_start_date = datetime.date.today()
-    user.membership_end_date = datetime.date.today() + timedelta(days=user.membership_plan.duration_months * 30)
+    user.membership_start_date = dt.date.today()
+    user.membership_end_date = dt.date.today() + dt.timedelta(days=user.membership_plan.duration_months * 30)
     user.save()
     
     return redirect('/admin_portal')
+
 
 def reject_payment(request, user_id):
     if 'admin_logged_in' not in request.session:
@@ -417,6 +422,7 @@ def reject_payment(request, user_id):
     user.delete()
     
     return redirect('/admin_portal')
+
 
 def add_trainer(request):
     if 'admin_logged_in' not in request.session:
@@ -450,6 +456,7 @@ def add_trainer(request):
     
     return render(request, 'admin/add_trainer.html', data)
 
+
 def all_trainers(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
@@ -464,6 +471,7 @@ def all_trainers(request):
     
     return render(request, 'admin/all_trainers.html', data)
 
+
 def delete_trainer(request, trainer_id):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
@@ -472,6 +480,7 @@ def delete_trainer(request, trainer_id):
     trainer.delete()
     
     return redirect('/all_trainers')
+
 
 def assign_trainer_to_member(request):
     if 'admin_logged_in' not in request.session:
@@ -487,6 +496,7 @@ def assign_trainer_to_member(request):
         member.save()
     
     return redirect('/admin_portal')
+
 
 def all_members(request):
     if 'admin_logged_in' not in request.session:
@@ -507,12 +517,13 @@ def all_members(request):
     data = {
     'members': members,
     'query': query,
-    'today': date.today(), 
+    'today': dt.date.today(), 
     'pending_count': Gym_user.get_pending_approvals().count(),
     'trainer_request_count': Gym_user.get_trainer_requests().count()
     }
     
     return render(request, 'admin/all_members.html', data)
+
 
 def delete_member(request, member_id):
     if 'admin_logged_in' not in request.session:
@@ -523,15 +534,17 @@ def delete_member(request, member_id):
     
     return redirect('/all_members')
 
+
 def search_members(request):
     return redirect('/all_members')
+
 
 def trainer_attendance(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
     
     trainers = Trainer.objects.all()
-    today = datetime.date.today()
+    today = dt.date.today()
     
     if request.method == "POST":
         for trainer in trainers:
@@ -563,6 +576,7 @@ def trainer_attendance(request):
     
     return render(request, 'admin/trainer_attendance.html', data)
 
+
 def attendance_history(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
@@ -584,6 +598,7 @@ def attendance_history(request):
     
     return render(request, 'admin/attendance_history.html', data)
 
+
 def progress_charts(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
@@ -596,8 +611,8 @@ def progress_charts(request):
     total_revenue = sum([member.membership_plan.price for member in all_members if member.membership_plan])
     
     # Members joined by month (last 12 months)
-    today = datetime.date.today()
-    twelve_months_ago = today - timedelta(days=365)
+    today = dt.date.today()
+    twelve_months_ago = today - dt.timedelta(days=365)
     
     members_by_month = defaultdict(int)
     revenue_by_month = defaultdict(int)
@@ -617,7 +632,7 @@ def progress_charts(request):
     # Format month labels
     month_labels = []
     for month in sorted_months:
-        date_obj = datetime.datetime.strptime(month, '%Y-%m')
+        date_obj = dt.datetime.strptime(month, '%Y-%m')
         month_labels.append(date_obj.strftime('%b %Y'))
     
     # Membership plan distribution
@@ -659,3 +674,79 @@ def progress_charts(request):
     }
     
     return render(request, 'admin/progress_charts.html', data)
+
+
+# ----------------- ENHANCED USER PORTAL VIEWS -----------------
+def workout_plan_detail_user(request):
+    """Enhanced workout plan page for users"""
+    if 'user_id' not in request.session:
+        return redirect('/user_login')
+
+    user = Gym_user.get_user_by_id(request.session['user_id'])
+    assigned_plan = user.assigned_workout_plan
+    all_plans = WorkoutPlan.objects.all().prefetch_related('workout_days')
+    
+    # Get today's workout
+    today_name = dt.datetime.now().strftime('%A')
+    today_workout = None
+    if assigned_plan:
+        today_workout = WorkoutDay.objects.filter(
+            workout_plan=assigned_plan, 
+            day_name=today_name
+        ).first()
+
+    context = {
+        'user': user,
+        'assigned_plan': assigned_plan,
+        'all_plans': all_plans,
+        'today_workout': today_workout,
+        'today_name': today_name
+    }
+    return render(request, 'workout_plan.html', context)
+
+
+def diet_plan_detail_user(request):
+    """Enhanced diet plan page for users"""
+    if 'user_id' not in request.session:
+        return redirect('/user_login')
+
+    user = Gym_user.get_user_by_id(request.session['user_id'])
+    assigned_plan = user.assigned_diet_plan
+    all_plans = DietPlan.objects.all().prefetch_related('diet_days')
+    
+    # Get today's meals
+    today_name = dt.datetime.now().strftime('%A')
+    today_meals = None
+    if assigned_plan:
+        today_meals = DietDay.objects.filter(
+            diet_plan=assigned_plan, 
+            day_name=today_name
+        ).first()
+
+    context = {
+        'user': user,
+        'assigned_plan': assigned_plan,
+        'all_plans': all_plans,
+        'today_meals': today_meals,
+        'today_name': today_name
+    }
+    return render(request, 'diet_plan.html', context)
+
+
+def upload_profile_image(request):
+    """Handle profile image uploads"""
+    if 'user_id' not in request.session:
+        return JsonResponse({'success': False, 'message': 'Not authenticated'})
+
+    if request.method == 'POST' and request.FILES.get('image'):
+        user = Gym_user.get_user_by_id(request.session['user_id'])
+        user.image = request.FILES['image']
+        user.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Profile image updated successfully',
+            'image_url': user.image.url
+        })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request'})

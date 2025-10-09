@@ -18,7 +18,13 @@ urlpatterns = [
     path('user_portal', views.user_portal, name='user_portal'),
     path('request_trainer', views.request_trainer, name='request_trainer'),
     path('update_user_info', views.update_user_info, name='update_user_info'),
+    
+    # Enhanced User Portal URLs
+    path('workout_plan', views.workout_plan_detail_user, name='workout_plan'),
+    path('diet_plan', views.diet_plan_detail_user, name='diet_plan'),
+    path('upload_profile_image/', views.upload_profile_image, name='upload_profile_image'),
 
+    
     # ----------------- TRAINER PORTAL -----------------
     path('trainer/dashboard', views.trainer_dashboard, name='trainer_dashboard'),
     path('trainer/clients', views.trainer_clients, name='trainer_clients'),
