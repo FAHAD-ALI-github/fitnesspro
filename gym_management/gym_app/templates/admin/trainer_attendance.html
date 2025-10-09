@@ -1,0 +1,110 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Trainer Attendance - FitnessPro Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4" data-aos="fade-down">
+        <div class="col-md-6">
+            <h1 class="gradient-text"><i class="fas fa-clipboard-check me-2"></i>Trainer Attendance</h1>
+            <p class="text-secondary">Mark attendance for {{ today|date:"F d, Y" }}</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'attendance_history' %}" class="btn btn-primary">
+                <i class="fas fa-history me-2"></i>View History
+            </a>
+        </div>
+    </div>
+
+    <!-- Attendance Form -->
+    <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="100">
+        <div class="col-lg-10">
+            {% if trainers %}
+            <form method="POST" action="{% url 'trainer_attendance' %}">
+                {% csrf_token %}
+                
+                <div class="dashboard-card">
+                    <h4 class="mb-4"><i class="fas fa-users me-2"></i>Select Present Trainers</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th width="35%">Trainer Name</th>
+                                    <th width="20%">Specialization</th>
+                                    <th width="10%" class="text-center">Present</th>
+                                    <th width="30%">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trainer in trainers %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if trainer.image %}
+                                                <img src="{{ trainer.image.url }}" alt="{{ trainer.first_name }}" 
+                                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                                            {% else %}
+                                                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-gradient); 
+                                                            display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: 600;">
+                                                    {{ trainer.first_name.0 }}{{ trainer.last_name.0 }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ trainer.first_name }} {{ trainer.last_name }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ trainer.specialization|default:"N/A" }}</td>
+                                    <td class="text-center">
+                                        <div class="form-check d-inline-block">
+                                            <input 
+                                                class="form-check-input" 
+                                                type="checkbox" 
+                                                name="trainer_{{ trainer.id }}" 
+                                                id="trainer_{{ trainer.id }}"
+                                                {% if trainer.id in marked_trainer_ids %}checked{% else %}checked{% endif %}
+                                                style="width: 24px; height: 24px; cursor: pointer;"
+                                            >
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input 
+                                            type="text" 
+                                            name="notes_{{ trainer.id }}" 
+                                            class="form-control"
+                                            placeholder="Add notes (optional)" 
+                                            style="border-radius: 8px;"
+                                        >
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check me-2"></i>Mark Attendance
+                        </button>
+                    </div>
+                </div>
+            </form>
+            {% else %}
+            <div class="dashboard-card text-center py-5">
+                <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No trainers available</h4>
+                <p class="text-secondary">Add trainers to mark their attendance</p>
+                <a href="{% url 'add_trainer' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-user-plus me-2"></i>Add New Trainer
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

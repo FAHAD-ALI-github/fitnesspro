@@ -1,10 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
+from django.db.models import Q, Count
 from .models import *
 import datetime
 from datetime import timedelta
+from collections import defaultdict
+import json
+from datetime import date
+
+
 
 ADMIN_CREDENTIALS = {
     'username': 'admin',
@@ -224,7 +230,6 @@ def create_workout_plan(request):
     if request.method == "POST":
         trainer = Trainer.objects.get(id=request.session['trainer_id'])
         
-        # Create workout plan
         workout = WorkoutPlan()
         workout.trainer = trainer
         workout.name = request.POST.get("name")
@@ -232,7 +237,6 @@ def create_workout_plan(request):
         workout.difficulty_level = request.POST.get("difficulty_level")
         workout.save()
         
-        # Create workout days
         for day in DAYS_OF_WEEK:
             exercises = request.POST.get(f"exercises_{day}")
             if exercises and exercises.strip():
@@ -252,7 +256,6 @@ def create_diet_plan(request):
     if request.method == "POST":
         trainer = Trainer.objects.get(id=request.session['trainer_id'])
         
-        # Create diet plan
         diet = DietPlan()
         diet.trainer = trainer
         diet.name = request.POST.get("name")
@@ -260,7 +263,6 @@ def create_diet_plan(request):
         diet.total_calories = request.POST.get("total_calories")
         diet.save()
         
-        # Create diet days
         for day in DAYS_OF_WEEK:
             breakfast = request.POST.get(f"breakfast_{day}")
             if breakfast and breakfast.strip():
@@ -299,16 +301,21 @@ def assign_plan_to_member(request):
     
     return redirect('/trainer_portal')
 
+# ADMIN VIEWS
+
 def admin_portal(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
     
     pending_approvals = Gym_user.get_pending_approvals()
     trainer_requests = Gym_user.get_trainer_requests()
-    all_members = Gym_user.objects.filter(is_approved=True)
+    all_members = Gym_user.objects.filter(is_approved=True).order_by('-date_of_joining')
     all_trainers = Trainer.objects.all()
     
     total_revenue = sum([member.membership_plan.price for member in all_members if member.membership_plan])
+    
+    pending_count = pending_approvals.count()
+    trainer_request_count = trainer_requests.count()
     
     data = {
         'admin': ADMIN_CREDENTIALS,
@@ -316,10 +323,15 @@ def admin_portal(request):
         'trainer_requests': trainer_requests,
         'all_members': all_members,
         'all_trainers': all_trainers,
-        'total_revenue': total_revenue
+        'total_revenue': total_revenue,
+        'pending_count': pending_count,
+        'trainer_request_count': trainer_request_count,
+        'total_members': all_members.count(),
+        'total_trainers': all_trainers.count(),
+        'today': datetime.date.today()
     }
     
-    return render(request, 'admin_portal.html', data)
+    return render(request, 'admin/dashboard.html', data)
 
 def approve_payment(request, user_id):
     if 'admin_logged_in' not in request.session:
@@ -344,22 +356,60 @@ def reject_payment(request, user_id):
     
     return redirect('/admin_portal')
 
-def create_trainer(request):
+def add_trainer(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
     
-    if request.method == "POST":
-        trainer = Trainer()
-        trainer.first_name = request.POST.get("first_name")
-        trainer.last_name = request.POST.get("last_name")
-        trainer.email = request.POST.get("email")
-        trainer.phone_number = request.POST.get("phone_number")
-        trainer.username = request.POST.get("username")
-        trainer.password = make_password(request.POST.get("password"))
-        trainer.specialization = request.POST.get("specialization")
-        trainer.save()
+    data = {
+        'pending_count': Gym_user.get_pending_approvals().count(),
+        'trainer_request_count': Gym_user.get_trainer_requests().count()
+    }
     
-    return redirect('/admin_portal')
+    if request.method == "POST":
+        error = ""
+        username = request.POST.get("username")
+        
+        if Trainer.get_trainer_by_username(username):
+            error = "Username already exists"
+            data["error"] = error
+        else:
+            trainer = Trainer()
+            trainer.first_name = request.POST.get("first_name")
+            trainer.last_name = request.POST.get("last_name")
+            trainer.email = request.POST.get("email")
+            trainer.phone_number = request.POST.get("phone_number")
+            trainer.username = username
+            trainer.password = make_password(request.POST.get("password"))
+            trainer.specialization = request.POST.get("specialization")
+            trainer.save()
+            
+            data["success"] = "Trainer created successfully!"
+            return redirect('/all_trainers')
+    
+    return render(request, 'admin/add_trainer.html', data)
+
+def all_trainers(request):
+    if 'admin_logged_in' not in request.session:
+        return redirect('/admin_login')
+    
+    trainers = Trainer.objects.all()
+    
+    data = {
+        'trainers': trainers,
+        'pending_count': Gym_user.get_pending_approvals().count(),
+        'trainer_request_count': Gym_user.get_trainer_requests().count()
+    }
+    
+    return render(request, 'admin/all_trainers.html', data)
+
+def delete_trainer(request, trainer_id):
+    if 'admin_logged_in' not in request.session:
+        return redirect('/admin_login')
+    
+    trainer = get_object_or_404(Trainer, id=trainer_id)
+    trainer.delete()
+    
+    return redirect('/all_trainers')
 
 def assign_trainer_to_member(request):
     if 'admin_logged_in' not in request.session:
@@ -376,6 +426,44 @@ def assign_trainer_to_member(request):
     
     return redirect('/admin_portal')
 
+def all_members(request):
+    if 'admin_logged_in' not in request.session:
+        return redirect('/admin_login')
+    
+    query = request.GET.get('q', '')
+    
+    if query:
+        members = Gym_user.objects.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(username__icontains=query) |
+            Q(phone_number__icontains=query)
+        ).filter(is_approved=True)
+    else:
+        members = Gym_user.objects.filter(is_approved=True)
+    
+    data = {
+    'members': members,
+    'query': query,
+    'today': date.today(), 
+    'pending_count': Gym_user.get_pending_approvals().count(),
+    'trainer_request_count': Gym_user.get_trainer_requests().count()
+    }
+    
+    return render(request, 'admin/all_members.html', data)
+
+def delete_member(request, member_id):
+    if 'admin_logged_in' not in request.session:
+        return redirect('/admin_login')
+    
+    member = get_object_or_404(Gym_user, id=member_id)
+    member.delete()
+    
+    return redirect('/all_members')
+
+def search_members(request):
+    return redirect('/all_members')
+
 def trainer_attendance(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
@@ -386,63 +474,40 @@ def trainer_attendance(request):
     if request.method == "POST":
         for trainer in trainers:
             present = request.POST.get(f"trainer_{trainer.id}")
-            if present:
-                TrainerAttendance.objects.update_or_create(
-                    trainer=trainer,
-                    date=today,
-                    defaults={'present': True}
-                )
+            notes = request.POST.get(f"notes_{trainer.id}", "").strip()  # get notes input
+            
+            TrainerAttendance.objects.update_or_create(
+                trainer=trainer,
+                date=today,
+                defaults={
+                    'present': present is not None,
+                    'notes': notes
+                }
+            )
+        
+        return redirect('/trainer_attendance')
     
     attendance_records = TrainerAttendance.objects.filter(date=today)
+    marked_trainer_ids = [record.trainer_id for record in attendance_records]
     
     data = {
         'trainers': trainers,
         'attendance_records': attendance_records,
-        'today': today
+        'marked_trainer_ids': marked_trainer_ids,
+        'today': today,
+        'pending_count': Gym_user.get_pending_approvals().count(),
+        'trainer_request_count': Gym_user.get_trainer_requests().count()
     }
     
-    return render(request, 'trainer_attendance.html', data)
-
-def delete_member(request, member_id):
-    if 'admin_logged_in' not in request.session:
-        return redirect('/admin_login')
-    
-    member = Gym_user.objects.get(id=member_id)
-    member.delete()
-    
-    return redirect('/admin_portal')
-
-def search_members(request):
-    if 'admin_logged_in' not in request.session:
-        return redirect('/admin_login')
-    
-    query = request.GET.get('q', '')
-    members = Gym_user.objects.filter(
-        first_name__icontains=query
-    ) | Gym_user.objects.filter(
-        last_name__icontains=query
-    ) | Gym_user.objects.filter(
-        username__icontains=query
-    )
-    
-    data = {
-        'members': members,
-        'query': query
-    }
-    
-    return render(request, 'search_results.html', data)
-
+    return render(request, 'admin/trainer_attendance.html', data)
 
 def attendance_history(request):
     if 'admin_logged_in' not in request.session:
         return redirect('/admin_login')
     
     trainers = Trainer.objects.all()
-    
-    # Get all attendance records ordered by date (most recent first)
     all_attendance = TrainerAttendance.objects.all().order_by('-date')
     
-    # Optional: Filter by trainer if provided
     trainer_filter = request.GET.get('trainer_id')
     if trainer_filter:
         all_attendance = all_attendance.filter(trainer_id=trainer_filter)
@@ -450,7 +515,85 @@ def attendance_history(request):
     data = {
         'trainers': trainers,
         'attendance_records': all_attendance,
-        'selected_trainer': trainer_filter
+        'selected_trainer': trainer_filter,
+        'pending_count': Gym_user.get_pending_approvals().count(),
+        'trainer_request_count': Gym_user.get_trainer_requests().count()
     }
     
-    return render(request, 'attendance_history.html', data)
+    return render(request, 'admin/attendance_history.html', data)
+
+def progress_charts(request):
+    if 'admin_logged_in' not in request.session:
+        return redirect('/admin_login')
+    
+    # Get all members
+    all_members = Gym_user.objects.filter(is_approved=True)
+    all_trainers = Trainer.objects.all()
+    
+    # Calculate revenue
+    total_revenue = sum([member.membership_plan.price for member in all_members if member.membership_plan])
+    
+    # Members joined by month (last 12 months)
+    today = datetime.date.today()
+    twelve_months_ago = today - timedelta(days=365)
+    
+    members_by_month = defaultdict(int)
+    revenue_by_month = defaultdict(int)
+    
+    for member in all_members:
+        if member.date_of_joining.date() >= twelve_months_ago:
+            month_key = member.date_of_joining.strftime('%Y-%m')
+            members_by_month[month_key] += 1
+            if member.membership_plan:
+                revenue_by_month[month_key] += member.membership_plan.price
+    
+    # Sort by date
+    sorted_months = sorted(members_by_month.keys())
+    member_counts = [members_by_month[month] for month in sorted_months]
+    revenue_counts = [revenue_by_month[month] for month in sorted_months]
+    
+    # Format month labels
+    month_labels = []
+    for month in sorted_months:
+        date_obj = datetime.datetime.strptime(month, '%Y-%m')
+        month_labels.append(date_obj.strftime('%b %Y'))
+    
+    # Membership plan distribution
+    plan_distribution = {}
+    for member in all_members:
+        if member.membership_plan:
+            plan_name = member.membership_plan.name
+            plan_distribution[plan_name] = plan_distribution.get(plan_name, 0) + 1
+    
+    # Active vs Expired memberships
+    active_members = 0
+    expired_members = 0
+    for member in all_members:
+        if member.membership_end_date:
+            if member.membership_end_date >= today:
+                active_members += 1
+            else:
+                expired_members += 1
+    
+    # Trainer assignment stats
+    assigned_members = all_members.filter(assigned_trainer__isnull=False).count()
+    unassigned_members = all_members.filter(assigned_trainer__isnull=True).count()
+    
+    data = {
+        'total_members': all_members.count(),
+        'total_trainers': all_trainers.count(),
+        'total_revenue': total_revenue,
+        'active_members': active_members,
+        'expired_members': expired_members,
+        'assigned_members': assigned_members,
+        'unassigned_members': unassigned_members,
+        'month_labels': json.dumps(month_labels),
+        'member_counts': json.dumps(member_counts),
+        'revenue_counts': json.dumps(revenue_counts),
+        'plan_names': json.dumps(list(plan_distribution.keys())),
+        'plan_counts': json.dumps(list(plan_distribution.values())),
+        'pending_count': Gym_user.get_pending_approvals().count(),
+        'trainer_request_count': Gym_user.get_trainer_requests().count()
+    }
+    
+    return render(request, 'admin/progress_charts.html', data)
