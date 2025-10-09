@@ -239,10 +239,32 @@
             width: 50px;
             height: 50px;
         }
+/* Default: show both name and specialization */
+.admin-user-info h6 {
+    margin-bottom: 0.25rem;
+}
 
-        .admin-sidebar.collapsed .admin-user-info h6 {
-            display: none;
-        }
+.admin-user-info small {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* When collapsed: hide specialization, keep name centered */
+.admin-sidebar.collapsed .admin-user-info .trainer-details {
+    text-align: center;
+}
+
+.admin-sidebar.collapsed .admin-user-info small {
+    display: none;
+}
+
+.admin-sidebar.collapsed .admin-user-info h6 {
+    display: block;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
 
         /* Navigation Menu */
         .admin-nav {
@@ -725,14 +747,18 @@
             </button>
             
             <div class="admin-user-info">
-                {% if trainer.image %}
-                    <img src="{{ trainer.image.url }}" class="admin-user-avatar" alt="Trainer Avatar">
-                {% else %}
-                    <img src="{% static 'images/find_user.png' %}" class="admin-user-avatar" alt="Trainer Avatar">
-                {% endif %}
-                <h6 class="gradient-text">{{ trainer.first_name }} {{ trainer.last_name }}</h6>
-                <small class="text-muted">{{ trainer.specialization|default:"Fitness Trainer" }}</small>
-            </div>
+    {% if trainer.image %}
+        <img src="{{ trainer.image.url }}" class="admin-user-avatar" alt="Trainer Avatar">
+    {% else %}
+        <img src="{% static 'images/find_user.png' %}" class="admin-user-avatar" alt="Trainer Avatar">
+    {% endif %}
+
+    <div class="trainer-details">
+        <h6 class="gradient-text">{{ trainer.first_name }} {{ trainer.last_name }}</h6>
+        <small class="text-muted">{{ trainer.specialization|default:"Fitness Trainer" }}</small>
+    </div>
+</div>
+
             
             <nav class="admin-nav">
                 <div class="admin-nav-item">
