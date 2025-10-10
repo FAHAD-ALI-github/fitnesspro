@@ -18,6 +18,8 @@ urlpatterns = [
     path('user_portal', views.user_portal, name='user_portal'),
     path('request_trainer', views.request_trainer, name='request_trainer'),
     path('update_user_info', views.update_user_info, name='update_user_info'),
+    path('change_password', views.change_password, name='change_password'),
+
     
     # Enhanced User Portal URLs
     path('workout_plan', views.workout_plan_detail_user, name='workout_plan'),

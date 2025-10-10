@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password, check_password
 from django.db.models import Q
 from collections import defaultdict
+from django.contrib import messages
 import datetime as dt
 import json
 
@@ -750,3 +751,34 @@ def upload_profile_image(request):
         })
     
     return JsonResponse({'success': False, 'message': 'Invalid request'})
+
+
+
+
+
+
+
+
+
+def change_password(request):
+    if 'user_id' not in request.session:
+        return redirect('/user_login')
+
+    user = Gym_user.get_user_by_id(request.session['user_id'])
+
+    if request.method == "POST":
+        old_password = request.POST.get("old_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if not check_password(old_password, user.password):
+            messages.error(request, "Old password is incorrect!")
+        elif new_password != confirm_password:
+            messages.error(request, "New passwords do not match!")
+        else:
+            user.password = make_password(new_password)
+            user.save()
+            messages.success(request, "Password changed successfully!")
+            return redirect('/user_portal')
+
+    return render(request, 'change_password.html', {'user': user})

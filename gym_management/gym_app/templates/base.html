@@ -45,8 +45,8 @@
             --bg-card: rgba(255, 255, 255, 0.05);
             
             --text-primary: #ffffff;
-            --text-secondary: #b3b3b3;
-            --text-muted: #666666;
+            --text-secondary: #dfdfdf;
+            --text-muted: #cacaca;
             
             --accent-primary: #667eea;
             --accent-secondary: #764ba2;
@@ -432,6 +432,76 @@
                 height: 38px;
             }
         }
+
+          /* Enhanced user dropdown styling */
+    .user-icon-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .user-icon.dropdown-toggle::after {
+        display: none !important; /* remove default caret */
+    }
+
+    .user-icon img {
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: var(--bg-card);
+    }
+
+    .user-icon img:hover {
+        transform: scale(1.08);
+        border-color: var(--accent-primary);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .dropdown-menu.user-dropdown {
+        background: rgba(20, 20, 20, 0.95);
+        backdrop-filter: var(--blur-md);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        border-radius: 1rem;
+        overflow: hidden;
+        min-width: 200px;
+        animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .dropdown-menu.user-dropdown .dropdown-item {
+        color: var(--text-secondary);
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-menu.user-dropdown .dropdown-item:hover {
+        background: var(--bg-card);
+        color: var(--accent-primary);
+        transform: translateX(3px);
+    }
+
+    .dropdown-menu.user-dropdown .dropdown-item i {
+        width: 18px;
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-menu.user-dropdown {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+}
+
+.dropdown-menu.user-dropdown.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -479,11 +549,38 @@
                     </li>
                 </ul>
                 
-                <div class="user-icon-container">
-                    <a href="/user_login" class="user-icon" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Login / Register">
-                        <i class="fas fa-user"></i>
-                    </a>
-                </div>
+<div class="user-icon-container dropdown">
+    {% if logged_in_user %}
+        <a href="#" class="user-icon dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="My Account">
+            <img src="{{ logged_in_user.image.url }}" alt="Profile" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userDropdown">
+            <li>
+                <a class="dropdown-item" href="/user_portal">
+                    <i class="fas fa-user-circle me-2"></i> My Profile
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="/change_password">
+                    <i class="fas fa-key me-2"></i> Change Password
+                </a>
+            </li>
+            <li>
+                <hr class="dropdown-divider bg-secondary opacity-25">
+            </li>
+            <li>
+                <a class="dropdown-item text-danger" href="/logout">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+            </li>
+        </ul>
+    {% else %}
+        <a href="/user_login" class="user-icon" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Login / Register">
+            <i class="fas fa-user"></i>
+        </a>
+    {% endif %}
+</div>
             </div>
         </div>
     </nav>
@@ -687,6 +784,60 @@
                 }
             });
         });
+        document.addEventListener('DOMContentLoaded', function () {
+    const userDropdown = document.querySelector('#userDropdown');
+    const dropdownMenu = document.querySelector('.user-dropdown');
+    let bsDropdown;
+    let manuallyOpened = false; // to track if user clicked to open it
+
+    if (userDropdown && dropdownMenu) {
+        bsDropdown = new bootstrap.Dropdown(userDropdown, { autoClose: false });
+
+        // --- Show on hover (but only if not manually clicked) ---
+        userDropdown.addEventListener('mouseenter', () => {
+            if (!manuallyOpened) bsDropdown.show();
+        });
+
+        dropdownMenu.addEventListener('mouseenter', () => {
+            if (!manuallyOpened) bsDropdown.show();
+        });
+
+        // --- Close when mouse leaves only if NOT manually clicked ---
+        userDropdown.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!manuallyOpened && !dropdownMenu.matches(':hover')) {
+                    bsDropdown.hide();
+                }
+            }, 200);
+        });
+
+        dropdownMenu.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!manuallyOpened && !userDropdown.matches(':hover')) {
+                    bsDropdown.hide();
+                }
+            }, 200);
+        });
+
+        // --- Toggle open/close when user clicks the icon ---
+        userDropdown.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isOpen = dropdownMenu.classList.contains('show');
+            manuallyOpened = !isOpen; // if open → next click closes
+            bsDropdown.toggle();
+        });
+
+        // --- Close dropdown when clicking outside of it ---
+        document.addEventListener('click', (event) => {
+            const isClickInside =
+                userDropdown.contains(event.target) || dropdownMenu.contains(event.target);
+            if (!isClickInside) {
+                bsDropdown.hide();
+                manuallyOpened = false;
+            }
+        });
+    }
+});
     </script>
     
     {% block extra_js %}{% endblock %}
