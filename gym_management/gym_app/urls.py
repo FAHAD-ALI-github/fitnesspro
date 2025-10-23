@@ -31,6 +31,8 @@ urlpatterns = [
     path('trainer/dashboard', views.trainer_dashboard, name='trainer_dashboard'),
     path('trainer/clients', views.trainer_clients, name='trainer_clients'),
     path('trainer/assign_plan', views.assign_plan_to_member, name='assign_plan_to_member'),
+    path('trainer/upload_profile_image/', views.upload_trainer_profile_image, name='upload_trainer_profile_image'),
+
 
     # Trainer workout plans
     path('trainer/create_workout_plan', views.create_workout_plan, name='create_workout_plan'),

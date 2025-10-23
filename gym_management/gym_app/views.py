@@ -28,8 +28,13 @@ DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturda
 
 # ----------------- HOME -----------------
 def home(request):
-    return render(request, 'home.html')
-
+    # Get all active trainers from the Trainer model
+    trainers = Trainer.objects.all()
+    
+    context = {
+        'trainers': trainers
+    }
+    return render(request, 'home.html', context)
 
 # ----------------- LOGIN & AUTH -----------------
 def user_login(request):
@@ -782,3 +787,24 @@ def change_password(request):
             return redirect('/user_portal')
 
     return render(request, 'change_password.html', {'user': user})
+
+
+# Add this new view function to your views.py file
+
+def upload_trainer_profile_image(request):
+    """Handle trainer profile image uploads"""
+    if 'trainer_id' not in request.session:
+        return JsonResponse({'success': False, 'message': 'Not authenticated'})
+
+    if request.method == 'POST' and request.FILES.get('image'):
+        trainer = Trainer.objects.get(id=request.session['trainer_id'])
+        trainer.image = request.FILES['image']
+        trainer.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Profile image updated successfully',
+            'image_url': trainer.image.url
+        })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request'})

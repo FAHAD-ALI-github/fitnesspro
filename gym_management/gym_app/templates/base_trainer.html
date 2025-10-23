@@ -217,18 +217,48 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        .admin-user-avatar-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
         .admin-user-avatar {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            margin: 0 auto 1rem;
+            margin: 0 auto;
             border: 3px solid var(--accent-primary);
             box-shadow: var(--shadow-glow);
             transition: all 0.3s ease;
+            object-fit: cover;
         }
 
         .admin-user-avatar:hover {
             transform: scale(1.05);
+        }
+
+        .admin-user-avatar-container::after {
+            content: 'Change Photo';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            font-size: 10px;
+            border-radius: 0 0 40px 40px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            width: 80px;
+            text-align: center;
+        }
+
+        .admin-user-avatar-container:hover::after {
+            opacity: 1;
         }
 
         .admin-sidebar.collapsed .admin-user-info {
@@ -239,32 +269,32 @@
             width: 50px;
             height: 50px;
         }
-/* Default: show both name and specialization */
-.admin-user-info h6 {
-    margin-bottom: 0.25rem;
-}
 
-.admin-user-info small {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
+        /* Default: show both name and specialization */
+        .admin-user-info h6 {
+            margin-bottom: 0.25rem;
+        }
 
-/* When collapsed: hide specialization, keep name centered */
-.admin-sidebar.collapsed .admin-user-info .trainer-details {
-    text-align: center;
-}
+        .admin-user-info small {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
 
-.admin-sidebar.collapsed .admin-user-info small {
-    display: none;
-}
+        /* When collapsed: hide specialization, keep name centered */
+        .admin-sidebar.collapsed .admin-user-info .trainer-details {
+            text-align: center;
+        }
 
-.admin-sidebar.collapsed .admin-user-info h6 {
-    display: block;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-}
+        .admin-sidebar.collapsed .admin-user-info small {
+            display: none;
+        }
 
+        .admin-sidebar.collapsed .admin-user-info h6 {
+            display: block;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
 
         /* Navigation Menu */
         .admin-nav {
@@ -619,6 +649,220 @@
             color: white;
         }
 
+        /* Modal Styles */
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Upload Modal Styles */
+        .upload-preview-container {
+            position: relative;
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 6px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), var(--shadow-lg);
+        }
+
+        .upload-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: all 0.3s ease;
+        }
+
+        .upload-preview-container:hover .upload-preview {
+            transform: scale(1.05);
+        }
+
+        .preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+        }
+
+        .upload-preview-container:hover .preview-overlay {
+            opacity: 1;
+        }
+
+        .preview-overlay i {
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .preview-info {
+            font-size: 0.8rem;
+        }
+
+        .upload-restrictions {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .upload-restrictions h6 {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .upload-restrictions ul li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* File input styling */
+        .form-control[type="file"] {
+            padding: 0.75rem;
+        }
+
+        .form-control[type="file"]::file-selector-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control[type="file"]::file-selector-button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        /* Upload button styling */
+        .upload-btn {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading state */
+        .upload-btn.loading {
+            pointer-events: none;
+        }
+
+        .upload-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: var(--accent-success);
+            background: rgba(46, 213, 115, 0.1);
+        }
+
+        .notification.error {
+            border-color: var(--accent-danger);
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+
+        .notification.success .notification-icon {
+            color: var(--accent-success);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--accent-danger);
+        }
+
         /* Responsive Design */
         @media (max-width: 991.98px) {
             .admin-sidebar {
@@ -646,6 +890,19 @@
             .dashboard-card {
                 padding: 1.5rem;
             }
+
+            .upload-preview-container {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .upload-restrictions {
+                padding: 0.75rem;
+            }
+            
+            .upload-restrictions ul {
+                font-size: 0.75rem;
+            }
         }
 
         /* Loading Animation */
@@ -670,11 +927,6 @@
             border-top: 3px solid var(--accent-primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* Utility Classes */
@@ -747,18 +999,19 @@
             </button>
             
             <div class="admin-user-info">
-    {% if trainer.image %}
-        <img src="{{ trainer.image.url }}" class="admin-user-avatar" alt="Trainer Avatar">
-    {% else %}
-        <img src="{% static 'images/find_user.png' %}" class="admin-user-avatar" alt="Trainer Avatar">
-    {% endif %}
+                <div class="admin-user-avatar-container" id="trainer-avatar-container">
+                    {% if trainer.image %}
+                        <img src="{{ trainer.image.url }}" class="admin-user-avatar" id="trainer-profile-avatar" alt="Trainer Avatar">
+                    {% else %}
+                        <img src="{% static 'images/find_user.png' %}" class="admin-user-avatar" id="trainer-profile-avatar" alt="Trainer Avatar">
+                    {% endif %}
+                </div>
 
-    <div class="trainer-details">
-        <h6 class="gradient-text">{{ trainer.first_name }} {{ trainer.last_name }}</h6>
-        <small class="text-muted">{{ trainer.specialization|default:"Fitness Trainer" }}</small>
-    </div>
-</div>
-
+                <div class="trainer-details">
+                    <h6 class="gradient-text">{{ trainer.first_name }} {{ trainer.last_name }}</h6>
+                    <small class="text-muted">{{ trainer.specialization|default:"Fitness Trainer" }}</small>
+                </div>
+            </div>
             
             <nav class="admin-nav">
                 <div class="admin-nav-item">
@@ -804,6 +1057,59 @@
         <main class="admin-content" id="adminContent">
             {% block content %}{% endblock %}
         </main>
+    </div>
+
+    <!-- Upload Profile Picture Modal -->
+    <div class="modal fade" id="trainerUploadModal" tabindex="-1" aria-labelledby="trainerUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trainerUploadModalLabel">Update Profile Picture</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="trainer-avatar-form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="text-center mb-4">
+                            <div class="upload-preview-container">
+                                {% if trainer.image %}
+                                    <img id="trainer-upload-preview" class="upload-preview" src="{{ trainer.image.url }}" alt="Preview">
+                                {% else %}
+                                    <img id="trainer-upload-preview" class="upload-preview" src="{% static 'images/find_user.png' %}" alt="Preview">
+                                {% endif %}
+                                <div class="preview-overlay">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                            </div>
+                            <div class="preview-info mt-2">
+                                <small class="text-muted">Preview will be cropped to circular shape</small>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="trainer-image-upload" class="form-label">Select New Image</label>
+                            <input class="form-control" type="file" id="trainer-image-upload" name="image" accept="image/*" required>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Recommended: Square image (1:1 ratio), max 5MB
+                            </div>
+                        </div>
+                        <div class="upload-restrictions">
+                            <h6 class="mb-2">Image Requirements:</h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Format: JPG, PNG, GIF, WebP</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Max size: 5MB</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Optimal: 300x300 pixels (1:1 ratio)</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Will be cropped to circular shape</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary upload-btn" id="trainer-upload-submit">Upload Picture</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -872,6 +1178,154 @@
                 sidebar.classList.remove('show');
             }
         });
+
+        // Profile Picture Upload Functionality
+        const trainerAvatarContainer = document.getElementById('trainer-avatar-container');
+        const trainerProfileAvatar = document.getElementById('trainer-profile-avatar');
+        const trainerImageUpload = document.getElementById('trainer-image-upload');
+        const trainerUploadPreview = document.getElementById('trainer-upload-preview');
+        const trainerUploadModal = new bootstrap.Modal(document.getElementById('trainerUploadModal'));
+        const trainerUploadSubmit = document.getElementById('trainer-upload-submit');
+        const trainerAvatarForm = document.getElementById('trainer-avatar-form');
+
+        // Click on avatar to open upload modal
+        trainerAvatarContainer.addEventListener('click', () => {
+            trainerUploadModal.show();
+        });
+
+        // Enhanced image preview with proper cropping
+        trainerImageUpload.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification('Invalid file type. Please upload JPEG, PNG, GIF, or WebP images.', 'error');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('File too large. Please upload images smaller than 5MB.', 'error');
+                    this.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Create a new image to check dimensions
+                    const img = new Image();
+                    img.onload = function() {
+                        // Ensure the preview maintains circular shape and proper sizing
+                        trainerUploadPreview.src = e.target.result;
+                        
+                        // Add loading animation
+                        trainerUploadPreview.style.opacity = '0.7';
+                        setTimeout(() => {
+                            trainerUploadPreview.style.opacity = '1';
+                        }, 300);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                
+                // Enable upload button
+                trainerUploadSubmit.disabled = false;
+            } else {
+                // Disable upload button if no file
+                trainerUploadSubmit.disabled = true;
+            }
+        });
+
+        // Enhanced upload functionality
+        trainerUploadSubmit.addEventListener('click', function() {
+            const fileInput = document.getElementById('trainer-image-upload');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showNotification('Please select an image file first.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            this.classList.add('loading');
+            this.innerHTML = 'Uploading...';
+            this.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            // Get CSRF token from the form
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            fetch('/trainer/upload_profile_image/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update the profile image with the new one
+                    trainerProfileAvatar.src = data.image_url + '?t=' + new Date().getTime();
+                    trainerUploadPreview.src = data.image_url + '?t=' + new Date().getTime();
+                    
+                    // Close modal
+                    const uploadModalInstance = bootstrap.Modal.getInstance(document.getElementById('trainerUploadModal'));
+                    uploadModalInstance.hide();
+                    
+                    // Show success notification
+                    showNotification(data.message || 'Profile picture updated successfully!', 'success');
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                showNotification('An error occurred while uploading the image: ' + error.message, 'error');
+            })
+            .finally(() => {
+                // Reset button state
+                trainerUploadSubmit.classList.remove('loading');
+                trainerUploadSubmit.innerHTML = 'Upload Picture';
+                trainerUploadSubmit.disabled = false;
+            });
+        });
+
+        // Show notification function
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} notification-icon"></i>
+                <div>${message}</div>
+            `;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
     </script>
     
     {% block extra_js %}{% endblock %}

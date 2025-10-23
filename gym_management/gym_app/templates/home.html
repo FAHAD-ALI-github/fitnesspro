@@ -559,41 +559,6 @@
         letter-spacing: 1px;
     }
 
-    .trainer-bio {
-        color: var(--text-secondary);
-        line-height: 1.6;
-        margin-bottom: 2rem;
-        font-size: 0.95rem;
-    }
-
-    .trainer-social {
-        display: flex;
-        justify-content: center;
-        gap: 0.75rem;
-    }
-
-    .social-link {
-        width: 45px;
-        height: 45px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border-color);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-secondary);
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
-
-    .social-link:hover {
-        background: var(--primary-gradient);
-        color: white;
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-md);
-        border-color: transparent;
-    }
-
     /* Contact Section */
     .contact-section {
         padding: 8rem 0;
@@ -662,7 +627,8 @@
         outline: none;
         border-color: var(--accent-primary);
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        background: rgba(255, 255, 255, 0.08);
+        background: rgb(46, 46, 46);
+        color: aliceblue;
     }
 
     .form-control::placeholder {
@@ -968,54 +934,29 @@
             </p>
         </div>
         
-<div class="trainers-grid">
-    <div class="trainer-card" data-aos="fade-up" data-aos-delay="100">
-        <img src="{% static 'images/trainer1.jpg' %}" alt="Asad Ullah" class="trainer-image">
-        <h3 class="trainer-name">Asad Ullah</h3>
-        <div class="trainer-specialty">Strength & Conditioning</div>
-        <p class="trainer-bio">
-            Former Olympic athlete with 10+ years of experience in strength training and athletic performance.
-            Specializes in powerlifting and functional movement patterns.
-        </p>
-        <div class="trainer-social">
-            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+        <div class="trainers-grid">
+            {% for trainer in trainers %}
+            <div class="trainer-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'0' }}00">
+                {% if trainer.image %}
+                    <img src="{{ trainer.image.url }}" alt="{{ trainer.first_name }} {{ trainer.last_name }}" class="trainer-image">
+                {% else %}
+                    <img src="{% static 'images/trainer-default.jpg' %}" alt="{{ trainer.first_name }} {{ trainer.last_name }}" class="trainer-image">
+                {% endif %}
+                <h3 class="trainer-name">{{ trainer.first_name }} {{ trainer.last_name }}</h3>
+                <div class="trainer-specialty">
+                    {% if trainer.specialization %}
+                        {{ trainer.specialization }}
+                    {% else %}
+                        Fitness Trainer
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No trainers available at the moment.</p>
+            </div>
+            {% endfor %}
         </div>
-    </div>
-
-    <div class="trainer-card" data-aos="fade-up" data-aos-delay="200">
-        <img src="{% static 'images/trainer2.jpg' %}" alt="Mohammad Ali" class="trainer-image">
-        <h3 class="trainer-name">Mohammad Ali</h3>
-        <div class="trainer-specialty">Yoga & Wellness</div>
-        <p class="trainer-bio">
-            Certified yoga instructor and wellness coach with expertise in mindfulness, flexibility,
-            and holistic health approaches. 500+ hour certified instructor.
-        </p>
-        <div class="trainer-social">
-            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-        </div>
-    </div>
-
-    <div class="trainer-card" data-aos="fade-up" data-aos-delay="300">
-        <img src="{% static 'images/trainer3.jpg' %}" alt="Ibrahim Khan" class="trainer-image">
-        <h3 class="trainer-name">Ibrahim Khan</h3>
-        <div class="trainer-specialty">HIIT & Cardio</div>
-        <p class="trainer-bio">
-            High-intensity training specialist and former military fitness instructor. Expert in
-            cardiovascular conditioning and metabolic training programs.
-        </p>
-        <div class="trainer-social">
-            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-        </div>
-    </div>
-</div>
-
-
     </div>
 </section>
 
@@ -1134,350 +1075,87 @@ function calculateBMI() {
     
     showBMIResult(bmi.toFixed(1), category, description, color);
 }
-(function() {
-  const form = document.getElementById('contactForm');
-  const status = document.getElementById('formStatus');
 
-  // Remove old error messages
-  function clearErrors() {
-    form.querySelectorAll('[data-error-for]').forEach(el => el.remove());
-  }
-
-  // Show a field error under the related input/textarea
-  function showFieldError(fieldName, message) {
-    const field = form.querySelector('[name="' + fieldName + '"]');
-    if (!field) return;
-    const wrapper = document.createElement('div');
-    wrapper.setAttribute('data-error-for', fieldName);
-    wrapper.style.color = '#d9534f'; // red
-    wrapper.style.fontSize = '0.9rem';
-    wrapper.style.marginTop = '6px';
-    wrapper.textContent = message;
-    // insert after the field (works for input and textarea inside their .form-group)
-    if (field.parentNode) field.parentNode.appendChild(wrapper);
-    else field.insertAdjacentElement('afterend', wrapper);
-  }
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    status.textContent = '';
-    status.style.color = '';
-    clearErrors();
-
-    // simple client-side required check (keeps built-in HTML validation behavior out of the way)
-    // If browser validation is preferred remove the next lines.
-    const requiredFields = form.querySelectorAll('[required]');
-    for (const f of requiredFields) {
-      if (!f.value.trim()) {
-        showFieldError(f.name || 'field', 'This field is required.');
-        status.textContent = '❌ Please fix the errors below.';
-        status.style.color = 'red';
-        return;
-      }
-    }
-
-    const formData = new FormData(form);
-
-    try {
-      const res = await fetch(form.action, {
-        method: form.method || 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: formData
-      });
-
-      if (res.ok) {
-        status.textContent = '✅ Your message has been sent successfully!';
-        status.style.color = 'green';
-        form.reset();
-        clearErrors();
-        return;
-      }
-
-      // If not ok, try to parse JSON (Formspree returns 422 with errors array)
-      const data = await res.json().catch(() => null);
-
-      if (data && data.errors && data.errors.length) {
-        status.textContent = '❌ Please fix the errors below.';
-        status.style.color = 'red';
-        data.errors.forEach(err => {
-          // Formspree error shape may vary; attempt several keys
-          const field = err.field || err.name || err.param || '';
-          const message = err.message || err.msg || err.error || 'Invalid input';
-          if (field) showFieldError(field, message);
-          else {
-            // fallback global error
-            const fallback = document.createElement('div');
-            fallback.setAttribute('data-error-for', 'global');
-            fallback.style.color = '#d9534f';
-            fallback.style.marginTop = '6px';
-            fallback.textContent = message;
-            status.parentNode?.insertBefore(fallback, status.nextSibling);
-          }
-        });
-        return;
-      }
-
-      // fallback error message
-      if (data && data.error) {
-        status.textContent = '❌ ' + data.error;
-        status.style.color = 'red';
-      } else {
-        status.textContent = '❌ Something went wrong. Please try again later.';
-        status.style.color = 'red';
-      }
-
-    } catch (err) {
-      status.textContent = '⚠️ Network error. Please check your connection.';
-      status.style.color = 'red';
-    }
-  });
-})();
-function showBMIResult(bmi, category, description, color) {
+function showBMIResult(value, category, description, color) {
     const resultDiv = document.getElementById("result");
     const bmiValue = document.getElementById("bmiValue");
     const bmiCategory = document.getElementById("bmiCategory");
     const bmiDescription = document.getElementById("bmiDescription");
     
-    bmiValue.textContent = bmi;
-    bmiValue.style.color = color;
+    bmiValue.textContent = value;
     bmiCategory.textContent = category;
-    bmiCategory.style.color = color;
     bmiDescription.textContent = description;
+    
+    bmiValue.style.color = color;
+    bmiCategory.style.color = color;
     
     resultDiv.classList.add("show");
 }
 
-// Contact Form Handler
-document.getElementById('contactForm').addEventListener('submit', function(e) {
+// Form submission handling
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Get form data
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-    
-    // Simulate form submission
-    const submitButton = this.querySelector('.submit-button');
+    const form = e.target;
+    const submitButton = form.querySelector('button[type="submit"]');
     const originalText = submitButton.innerHTML;
+    const statusElement = document.getElementById('formStatus');
     
-    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+    // Disable button and show loading state
     submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+    statusElement.textContent = '';
     
-    setTimeout(() => {
-        submitButton.innerHTML = '<i class="fas fa-check me-2"></i>Message Sent!';
-        submitButton.style.background = 'var(--accent-success)';
-        
-        setTimeout(() => {
-            submitButton.innerHTML = originalText;
-            submitButton.style.background = 'var(--primary-gradient)';
-            submitButton.disabled = false;
-            this.reset();
-            
-            // Show success notification
-            showNotification('Thank you! Your message has been sent successfully.', 'success');
-        }, 2000);
-    }, 1500);
-});
-
-// Enhanced form interactions
-document.querySelectorAll('.bmi-input, .form-control').forEach(input => {
-    input.addEventListener('focus', function() {
-        this.parentElement.style.transform = 'translateY(-2px)';
-    });
-    
-    input.addEventListener('blur', function() {
-        this.parentElement.style.transform = 'translateY(0)';
-    });
-    
-    // Real-time BMI calculation
-    if (input.id === 'height' || input.id === 'weight') {
-        input.addEventListener('input', function() {
-            const height = document.getElementById('height').value;
-            const weight = document.getElementById('weight').value;
-            
-            if (height && weight && height > 0 && weight > 0) {
-                setTimeout(() => calculateBMI(), 500);
+    try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
             }
         });
+        
+        if (response.ok) {
+            statusElement.textContent = 'Thank you! Your message has been sent successfully.';
+            statusElement.style.color = '#2ed573';
+            form.reset();
+        } else {
+            throw new Error('Form submission failed');
+        }
+    } catch (error) {
+        statusElement.textContent = 'Sorry, there was an error sending your message. Please try again later.';
+        statusElement.style.color = '#ff4757';
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
     }
 });
 
-// Notification system
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} me-2"></i>
-            ${message}
-        </div>
-    `;
-    
-    // Add notification styles
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        background: var(--bg-card);
-        backdrop-filter: var(--blur-md);
-        border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        padding: 1rem 1.5rem;
-        color: var(--text-primary);
-        z-index: 1050;
-        transform: translateX(400px);
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: var(--shadow-lg);
-        max-width: 350px;
-    `;
-    
-    if (type === 'success') {
-        notification.style.borderColor = 'var(--accent-success)';
-    }
-    
-    document.body.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Animate out and remove
-    setTimeout(() => {
-        notification.style.transform = 'translateX(400px)';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 400);
-    }, 4000);
-}
-
-// Parallax effects for hero section
-window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const hero = document.querySelector('.hero-section');
-    const floatingElements = document.querySelectorAll('.floating-element');
-    
-    if (hero) {
-        hero.style.transform = `translateY(${scrolled * 0.3}px)`;
-    }
-    
-    floatingElements.forEach((element, index) => {
-        const speed = 0.1 + (index * 0.05);
-        element.style.transform = `translateY(${scrolled * speed}px) rotate(${scrolled * 0.1}deg)`;
-    });
-});
-
-// Enhanced scroll animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+// Smooth scrolling for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
     });
-}, observerOptions);
-
-// Observe elements for animation
-document.querySelectorAll('.feature-card, .trainer-card').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(30px)';
-    el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-    observer.observe(el);
 });
 
-// Loading enhancement
-window.addEventListener('load', () => {
-    document.body.style.opacity = '1';
-    document.querySelectorAll('img').forEach(img => {
-        img.style.animation = 'fadeInUp 0.6s ease-out';
-    });
-});
-
-// Keyboard accessibility
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.classList.contains('calculate-button')) {
-        calculateBMI();
+// AOS initialization for scroll animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS if available
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
     }
 });
-
-// Enhanced mobile experience
-if ('ontouchstart' in window) {
-    document.querySelectorAll('.feature-card, .trainer-card').forEach(card => {
-        card.addEventListener('touchstart', function() {
-            this.style.transform = 'translateY(-5px) scale(1.02)';
-        });
-        
-        card.addEventListener('touchend', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-}
 </script>
-
-<style>
-/* Additional notification styles */
-.notification {
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.notification-content {
-    display: flex;
-    align-items: center;
-}
-
-/* Enhanced mobile responsiveness */
-@media (max-width: 576px) {
-    .hero-title {
-        font-size: 2.5rem !important;
-    }
-    
-    .section-title {
-        font-size: 2rem !important;
-    }
-    
-    .bmi-calculator,
-    .contact-form {
-        padding: 1.5rem !important;
-    }
-    
-    .cta-primary,
-    .cta-secondary {
-        padding: 0.875rem 2rem;
-        font-size: 1rem;
-    }
-    
-    .contact-container {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .feature-grid,
-    .trainers-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1.5rem;
-    }
-}
-
-/* Performance optimizations */
-.hero-section,
-.features-section,
-.healthy-section,
-.bmi-section,
-.trainers-section,
-.contact-section {
-    contain: layout style paint;
-}
-
-img {
-    will-change: transform;
-}
-
-.floating-element {
-    will-change: transform;
-}
-</style>
 {% endblock %}
