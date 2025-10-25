@@ -1,0 +1,372 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Change Gym Info - FitnessPro Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .gym-info-container {
+        padding: 2rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-md);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 2rem;
+    }
+
+    .info-display-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-md);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 2rem;
+    }
+
+    .form-card:hover,
+    .info-display-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-md);
+    }
+
+    .form-section {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-section:last-of-type {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        color: var(--text-primary);
+    }
+
+    .form-label i {
+        font-size: 1.1rem;
+    }
+
+    .form-control {
+        padding: 0.875rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 2rem;
+    }
+
+    .btn-secondary {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.75rem 1.75rem;
+        font-weight: 600;
+        border-radius: 2rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-secondary:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--border-hover);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .info-table {
+        margin-bottom: 0;
+    }
+
+    .info-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .info-table td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+    }
+
+    .info-table td:first-child {
+        width: 35%;
+        white-space: nowrap;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        font-size: 1.3rem;
+    }
+
+    .helper-text {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .alert {
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 991.98px) {
+        .gym-info-container {
+            padding: 1.5rem 1rem;
+        }
+
+        .form-card,
+        .info-display-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .gym-info-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .form-card,
+        .info-display-card {
+            padding: 1.5rem 1.25rem;
+            border-radius: 1rem;
+        }
+
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+
+        .info-table td:first-child {
+            width: 40%;
+            font-size: 0.9rem;
+        }
+
+        .info-table td {
+            padding: 1rem 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .form-card,
+        .info-display-card {
+            padding: 1.25rem 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .page-header p {
+            font-size: 0.9rem;
+        }
+
+        .form-label {
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            padding: 0.65rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="gym-info-container">
+    <div class="page-header" data-aos="fade-down">
+        <h1 class="gradient-text mb-2">
+            <i class="fas fa-info-circle me-3"></i>Gym Information
+        </h1>
+        <p class="text-secondary mb-0">Update your gym's contact information and operating hours</p>
+    </div>
+
+    {% if messages %}
+    <div data-aos="fade-up">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-10 col-xl-8 mx-auto">
+            <!-- Form Card -->
+            <div class="form-card" data-aos="fade-up">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-section">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">
+                            <i class="fas fa-map-marker-alt me-2 gradient-text"></i>
+                            <span>Gym Address</span>
+                        </label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                        <div class="text-danger mt-2">
+                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ form.address.errors.0 }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-section">
+                        <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                            <i class="fas fa-phone me-2 gradient-text"></i>
+                            <span>Phone Number</span>
+                        </label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}
+                        <div class="text-danger mt-2">
+                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ form.phone_number.errors.0 }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-section">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                            <i class="fas fa-envelope me-2 gradient-text"></i>
+                            <span>Email Address</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="text-danger mt-2">
+                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ form.email.errors.0 }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-section">
+                        <label for="{{ form.operating_hours.id_for_label }}" class="form-label">
+                            <i class="fas fa-clock me-2 gradient-text"></i>
+                            <span>Operating Hours</span>
+                        </label>
+                        {{ form.operating_hours }}
+                        {% if form.operating_hours.errors %}
+                        <div class="text-danger mt-2">
+                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ form.operating_hours.errors.0 }}</small>
+                        </div>
+                        {% endif %}
+                        <small class="helper-text">
+                            <i class="fas fa-info-circle me-1"></i>Example: Mon-Fri: 6AM-10PM, Sat-Sun: 8AM-8PM
+                        </small>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'admin_portal' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Information
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Current Information Display -->
+            {% if gym_info %}
+            <div class="info-display-card" data-aos="fade-up" data-aos-delay="100">
+                <h5 class="section-title gradient-text">
+                    <i class="fas fa-eye me-2"></i>
+                    <span>Current Information</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table info-table">
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold">
+                                    <i class="fas fa-map-marker-alt me-2 gradient-text"></i>Address
+                                </td>
+                                <td>{{ gym_info.address }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">
+                                    <i class="fas fa-phone me-2 gradient-text"></i>Phone
+                                </td>
+                                <td>{{ gym_info.phone_number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">
+                                    <i class="fas fa-envelope me-2 gradient-text"></i>Email
+                                </td>
+                                <td>{{ gym_info.email }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">
+                                    <i class="fas fa-clock me-2 gradient-text"></i>Hours
+                                </td>
+                                <td>{{ gym_info.operating_hours }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

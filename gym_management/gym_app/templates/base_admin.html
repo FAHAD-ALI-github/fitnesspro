@@ -40,7 +40,7 @@
             
             --text-primary: #ffffff;
             --text-secondary: #b3b3b3;
-            --text-muted: #666666;
+            --text-muted: #8b8b8b;
             
             --accent-primary: #667eea;
             --accent-secondary: #764ba2;
@@ -775,6 +775,12 @@
                         <span>Progress Charts</span>
                     </a>
                 </div>
+                <div class="admin-nav-item">
+    <a href="{% url 'change_gym_info' %}" class="admin-nav-link {% if request.path == '/change_gym_info/' %}active{% endif %}">
+        <i class="fas fa-info-circle gradient-text"></i>
+        <span>Change Gym Info</span>
+    </a>
+</div>
             </nav>
         </aside>
 

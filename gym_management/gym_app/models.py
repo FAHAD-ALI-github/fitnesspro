@@ -208,3 +208,32 @@ class TrainerAttendance(models.Model):
     
     def __str__(self):
         return f"{self.trainer.first_name} - {self.date} - {'Present' if self.present else 'Absent'}"
+    
+
+class GymInfo(models.Model):
+    address = models.CharField(max_length=200)
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField(max_length=100)
+    operating_hours = models.CharField(max_length=100)
+    
+    class Meta:
+        verbose_name = "Gym Information"
+        verbose_name_plural = "Gym Information"
+    
+    def __str__(self):
+        return "Gym Contact Information"
+    
+    def save(self, *args, **kwargs):
+        # Enforce single instance
+        if not self.pk and GymInfo.objects.exists():
+            # If trying to create a new instance when one already exists
+            raise ValueError("There can only be one GymInfo instance")
+        return super().save(*args, **kwargs)
+    
+    @staticmethod
+    def get_instance():
+        """Get the single GymInfo instance or return None"""
+        try:
+            return GymInfo.objects.first()
+        except GymInfo.DoesNotExist:
+            return None

@@ -40,7 +40,7 @@
             
             --text-primary: #ffffff;
             --text-secondary: #b3b3b3;
-            --text-muted: #666666;
+            --text-muted: #858585;
             
             --accent-primary: #667eea;
             --accent-secondary: #764ba2;
@@ -1009,7 +1009,7 @@
 
                 <div class="trainer-details">
                     <h6 class="gradient-text">{{ trainer.first_name }} {{ trainer.last_name }}</h6>
-                    <small class="text-muted">{{ trainer.specialization|default:"Fitness Trainer" }}</small>
+                    <small   style = "color : var(--text-muted)"  >{{ trainer.specialization|default:"Fitness Trainer" }}</small>
                 </div>
             </div>
             
@@ -1082,7 +1082,7 @@
                                 </div>
                             </div>
                             <div class="preview-info mt-2">
-                                <small class="text-muted">Preview will be cropped to circular shape</small>
+                                <small   style = "color : var(--text-muted)"  >Preview will be cropped to circular shape</small>
                             </div>
                         </div>
                         <div class="mb-3">

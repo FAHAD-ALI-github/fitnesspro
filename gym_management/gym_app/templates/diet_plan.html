@@ -244,7 +244,7 @@
                         <div class="text-center py-5">
                             <i class="fas fa-utensils text-muted mb-3" style="font-size: 4rem;"></i>
                             <h3>No Diet Plan Assigned</h3>
-                            <p class="text-muted">Contact your trainer to get a personalized diet plan</p>
+                            <p   style = "color : var(--text-muted)"  >Contact your trainer to get a personalized diet plan</p>
                             {% if user.assigned_trainer %}
                             <a href="/user_portal" class="cta-btn mt-3">Contact Trainer</a>
                             {% else %}
@@ -341,7 +341,7 @@
                             {% empty %}
                             <div class="text-center py-4">
                                 <i class="fas fa-utensils text-muted mb-3" style="font-size: 3rem;"></i>
-                                <p class="text-muted">No diet plans available yet</p>
+                                <p   style = "color : var(--text-muted)"  >No diet plans available yet</p>
                             </div>
                             {% endfor %}
                         </div>

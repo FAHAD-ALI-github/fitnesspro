@@ -110,7 +110,7 @@
                                         {% if member.membership_plan %}
                                             <span class="badge badge-info">{{ member.membership_plan.name }}</span>
                                             <br>
-                                            <small class="text-muted">PKR {{ member.membership_plan.price }}</small>
+                                            <small   style = "color : var(--text-muted)"  >PKR {{ member.membership_plan.price }}</small>
                                         {% else %}
                                             <span class="badge badge-warning">No Plan</span>
                                         {% endif %}
@@ -119,7 +119,7 @@
                                         {% if member.assigned_trainer %}
                                             {{ member.assigned_trainer.first_name }} {{ member.assigned_trainer.last_name }}
                                         {% else %}
-                                            <span class="text-muted">Not Assigned</span>
+                                            <span   style = "color : var(--text-muted)"  >Not Assigned</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -127,11 +127,11 @@
                                             {% if member.membership_end_date >= today %}
                                                 <span class="badge badge-success">Active</span>
                                                 <br>
-                                                <small class="text-muted">Until {{ member.membership_end_date }}</small>
+                                                <small   style = "color : var(--text-muted)"  >Until {{ member.membership_end_date }}</small>
                                             {% else %}
                                                 <span class="badge badge-danger">Expired</span>
                                                 <br>
-                                                <small class="text-muted">{{ member.membership_end_date }}</small>
+                                                <small   style = "color : var(--text-muted)"  >{{ member.membership_end_date }}</small>
                                             {% endif %}
                                         {% else %}
                                             <span class="badge badge-warning">Pending</span>
@@ -152,7 +152,7 @@
                     {% else %}
                     <div class="dashboard-card text-center py-5">
                         <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                        <h4 class="text-muted">No members found</h4>
+                        <h4   style = "color : var(--text-muted)"  >No members found</h4>
                         {% if query %}
                         <p class="text-secondary">Try a different search term</p>
                         <a href="{% url 'all_members' %}" class="btn btn-primary mt-3">

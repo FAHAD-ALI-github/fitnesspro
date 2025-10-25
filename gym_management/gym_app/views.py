@@ -5,13 +5,38 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.db.models import Q
 from collections import defaultdict
 from django.contrib import messages
+from django import forms
 import datetime as dt
 import json
-
 from .models import (
     Gym_user, Trainer, WorkoutPlan, WorkoutDay,
-    DietPlan, DietDay, TrainerAttendance, MembershipPlan, Gender
+    DietPlan, DietDay, TrainerAttendance, MembershipPlan, Gender, GymInfo
 )
+
+# Form for GymInfo
+class GymInfoForm(forms.ModelForm):
+    class Meta:
+        model = GymInfo
+        fields = ['address', 'phone_number', 'email', 'operating_hours']
+        widgets = {
+            'address': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter gym address'
+            }),
+            'phone_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter phone number'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter email address'
+            }),
+            'operating_hours': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Mon-Fri: 6AM-10PM, Sat-Sun: 8AM-8PM'
+            }),
+        }
+
 
 # ----------------- CONSTANTS -----------------
 ADMIN_CREDENTIALS = {
@@ -680,7 +705,39 @@ def progress_charts(request):
     }
     
     return render(request, 'admin/progress_charts.html', data)
-
+def change_gym_info(request):
+    if 'admin_logged_in' not in request.session:
+        return redirect('/admin_login')
+    
+    # Get or create the single GymInfo instance
+    gym_info = GymInfo.objects.first()
+    
+    if request.method == "POST":
+        if gym_info:
+            form = GymInfoForm(request.POST, instance=gym_info)
+        else:
+            form = GymInfoForm(request.POST)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Gym information updated successfully!")
+            return redirect('/change_gym_info/')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        if gym_info:
+            form = GymInfoForm(instance=gym_info)
+        else:
+            form = GymInfoForm()
+    
+    data = {
+        'form': form,
+        'gym_info': gym_info,
+        'pending_count': Gym_user.get_pending_approvals().count(),
+        'trainer_request_count': Gym_user.get_trainer_requests().count()
+    }
+    
+    return render(request, 'admin/change_gym_info.html', data)
 
 # ----------------- ENHANCED USER PORTAL VIEWS -----------------
 def workout_plan_detail_user(request):

@@ -343,7 +343,7 @@ body.light-mode select.form-control {
                                     <div>
                                         <strong>{{ member.first_name }} {{ member.last_name }}</strong>
                                         <br>
-                                        <small class="text-muted">{{ member.username }}</small>
+                                        <small   style = "color : var(--text-muted)"  >{{ member.username }}</small>
                                     </div>
                                 </div>
                             </td>
@@ -358,7 +358,7 @@ body.light-mode select.form-control {
                                 {% if member.assigned_trainer %}
                                     {{ member.assigned_trainer.first_name }} {{ member.assigned_trainer.last_name }}
                                 {% else %}
-                                    <span class="text-muted">Not Assigned</span>
+                                    <span   style = "color : var(--text-muted)"  >Not Assigned</span>
                                 {% endif %}
                             </td>
                             <td>

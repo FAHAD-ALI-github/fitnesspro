@@ -1,4 +1,4 @@
-from .models import Gym_user, Trainer
+from .models import Gym_user, Trainer, GymInfo
 
 def logged_in_user(request):
     user = None
@@ -16,3 +16,15 @@ def logged_in_user(request):
             trainer = None
 
     return {'logged_in_user': user, 'logged_in_trainer': trainer}
+
+
+# Context processor to provide gym information globally
+
+def gym_info_context(request):
+    """
+    Context processor to make gym_info available to all templates
+    """
+    gym_info = GymInfo.objects.first()
+    return {
+        'gym_info': gym_info
+    }

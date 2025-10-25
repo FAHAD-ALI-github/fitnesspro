@@ -52,7 +52,8 @@ urlpatterns = [
     path('admin_portal', views.admin_portal, name='admin_portal'),
     path('approve_payment/<int:user_id>', views.approve_payment, name='approve_payment'),
     path('reject_payment/<int:user_id>', views.reject_payment, name='reject_payment'),
-
+    path('change_gym_info/', views.change_gym_info, name='change_gym_info'),
+    
     # Trainer management
     path('add_trainer', views.add_trainer, name='add_trainer'),
     path('all_trainers', views.all_trainers, name='all_trainers'),

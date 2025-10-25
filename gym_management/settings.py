@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'gym_management.gym_app.context_processors.logged_in_user',
+                'gym_management.gym_app.context_processors.gym_info_context',
             ],
         },
     },
