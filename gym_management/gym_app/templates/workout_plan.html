@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Workout Plan - FitnessPro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .day-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .day-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-hover);
+    }
+
+    .day-title {
+        color: var(--text-primary);
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-gradient);
+    }
+
+    .exercises-content {
+        white-space: pre-line;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .plan-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-hover);
+    }
+
+    .difficulty-badge {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .current-badge {
+        background: var(--success-gradient);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .today-highlight {
+        border-left: 4px solid var(--accent-success);
+        background: rgba(46, 213, 115, 0.1);
+    }
+
+    .exercise-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .exercise-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="portal-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="portal-card animate-slide-up">
+                    <div class="portal-header">
+                        <h1 class="portal-name">My Workout Plan</h1>
+                        <p class="portal-username">Personalized fitness routine</p>
+                    </div>
+
+                    <div class="portal-body">
+                        {% if assigned_plan %}
+                        <!-- Assigned Workout Plan -->
+                        <div class="portal-info animate-slide-up">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="mb-0">{{ assigned_plan.name }}</h3>
+                                <span class="difficulty-badge">{{ assigned_plan.difficulty_level|capfirst }}</span>
+                            </div>
+                            <p class="text-secondary mb-4">{{ assigned_plan.description }}</p>
+                            <p class=" mb-4" style="color: rgb(162, 162, 162)">
+                                <i class="fas fa-user-tie me-2"></i>
+                                Created by: {{ assigned_plan.trainer.first_name }} {{ assigned_plan.trainer.last_name }}
+                            </p>
+                            
+                            <!-- Today's Workout -->
+                            {% if today_workout %}
+                            <div class="day-card today-highlight mb-4">
+                                <h5 class="day-title">
+                                    <i class="fas fa-star me-2 text-warning"></i>
+                                    Today's Workout ({{ today_name }})
+                                </h5>
+                                <div class="exercises-content">{{ today_workout.exercises }}</div>
+                                {% if today_workout.notes %}
+                                <div class="mt-3 p-3 bg-warning bg-opacity-10 rounded">
+                                    <strong>Notes:</strong> {{ today_workout.notes }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Weekly Workout Plan -->
+                            <h5 class="mb-3">Weekly Schedule</h5>
+                            {% for day in assigned_plan.workout_days.all %}
+                            <div class="day-card {% if day.day_name == today_name %}today-highlight{% endif %}">
+                                <h6 class="day-title">{{ day.day_name }}</h6>
+                                <div class="exercises-content">{{ day.exercises }}</div>
+                                {% if day.notes %}
+                                <div class="mt-2 p-2 bg-primary bg-opacity-10 rounded">
+                                    <small><strong>Notes:</strong> {{ day.notes }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-dumbbell mb-3" style="font-size: 3rem; color : var(--text-muted)"></i>
+                                <p style="color : var(--text-muted)">No workout schedule available for this plan</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <!-- No Assigned Plan -->
+                        <div class="text-center py-5">
+                            <i class="fas fa-dumbbell mb-3" style="font-size: 4rem; color : var(--text-muted)"></i>
+                            <h3>No Workout Plan Assigned</h3>
+                            <p style="color : var(--text-muted)">Contact your trainer to get a personalized workout plan</p>
+
+                            {% if user.assigned_trainer %}
+                                <p class="mt-3" style="color : var(--text-muted); font-size: 1.1rem;">
+                                    <strong>Trainer's Phone:</strong> {{ user.assigned_trainer.phone_number }}
+                                </p>
+                            {% else %}
+                                <a href="/request_trainer" class="cta-btn mt-3">Request Trainer</a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- All Available Plans -->
+                        <div class="portal-info animate-slide-up animate-delay-2">
+                            <h3 class="mb-4">All Available Workout Plans</h3>
+                            
+                            {% for plan in all_plans %}
+                            <div class="plan-card">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="mb-0">{{ plan.name }}</h5>
+                                    <div>
+                                        <span class="difficulty-badge me-2">{{ plan.difficulty_level|capfirst }}</span>
+                                        {% if plan == assigned_plan %}
+                                        <span class="current-badge">Current Plan</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <p class=" mb-3" style="color : var(--text-muted)">{{ plan.description }}</p>
+                                <p class=" mb-3" style="color : var(--text-muted)">
+                                    <small>
+                                        <i class="fas fa-user-tie me-1"></i>
+                                        By: {{ plan.trainer.first_name }} {{ plan.trainer.last_name }}
+                                    </small>
+                                </p>
+
+                                <!-- Workout Days -->
+                                <div class="week-plan">
+                                    {% for day in plan.workout_days.all %}
+                                    <div class="day-card mb-3">
+                                        <h6 class="day-title">{{ day.day_name }}</h6>
+                                        <div class="exercises-content">{{ day.exercises }}</div>
+                                        {% if day.notes %}
+                                        <div class="mt-2 p-2 bg-primary bg-opacity-10 rounded">
+                                            <small><strong>Notes:</strong> {{ day.notes }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-center py-3">
+                                        <p   style = "color : var(--text-muted)"  >No workout schedule available</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-dumbbell mb-3" style="font-size: 3rem; color : var(--text-muted)"></i>
+                                <p   style = "color : var(--text-muted)"  >No workout plans available yet</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enhanced hover effects for workout cards
+    const workoutCards = document.querySelectorAll('.plan-card, .day-card');
+    
+    workoutCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Initialize animations
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            document.querySelectorAll('.animate-slide-up').forEach((el, index) => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            });
+        }, 100);
+    });
+</script>
+{% endblock %}

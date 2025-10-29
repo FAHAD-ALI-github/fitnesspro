@@ -1,0 +1,886 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>{% block title %}FitnessPro - Transform Your Body, Transform Your Life{% endblock %}</title>
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" as="style">
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Transform your body and mind with FitnessPro. Modern gym with expert trainers, quality equipment, and personalized fitness programs.">
+    <meta name="keywords" content="fitness, gym, training, workout, health, nutrition, personal trainer">
+    <meta name="author" content="FitnessPro">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="FitnessPro - Premier Fitness Center">
+    <meta property="og:description" content="Join thousands who have transformed their lives with our expert fitness programs">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    
+    <!-- External Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #dfdfdf;
+            --text-muted: #9c9c9c;
+            
+            --accent-primary: #667eea;
+            --accent-secondary: #764ba2;
+            --accent-danger: #ff4757;
+            --accent-success: #2ed573;
+            --accent-warning: #ffa502;
+            
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+            
+            --blur-sm: blur(8px);
+            --blur-md: blur(16px);
+            --blur-lg: blur(32px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Selection */
+        ::selection {
+            background: rgba(102, 126, 234, 0.3);
+            color: var(--text-primary);
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(10, 10, 10, 0.95) !important;
+            backdrop-filter: var(--blur-md);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1rem 0;
+            z-index: 1030;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 10, 0.98) !important;
+            box-shadow: var(--shadow-md);
+        }
+
+        .navbar-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            margin: 0 0.75rem;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.5rem 0 !important;
+        }
+
+        .navbar-nav .nav-link::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background: var(--primary-gradient);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: var(--text-primary) !important;
+        }
+
+        .navbar-nav .nav-link:hover::before,
+        .navbar-nav .nav-link.active::before {
+            width: 100%;
+        }
+
+        .user-icon-container {
+            position: relative;
+        }
+
+        .user-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-sm);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .user-icon:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .user-icon:hover::before {
+            opacity: 0.1;
+        }
+
+        .user-icon i {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Mobile Menu */
+        .navbar-toggler {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-sm);
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='m4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--dark-gradient);
+            border-top: 1px solid var(--border-color);
+            padding: 4rem 0 0;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--primary-gradient);
+            opacity: 0.5;
+        }
+
+        .footer h6 {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .footer h6::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--primary-gradient);
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer a:hover {
+            color: var(--accent-primary);
+            transform: translateX(5px);
+        }
+
+        .footer .social-links a {
+            width: 45px;
+            height: 45px;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur-sm);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .footer .social-links a:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .copyright {
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .copyright a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .copyright a:hover {
+            color: var(--accent-secondary);
+        }
+
+        /* Back to Top */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 55px;
+            height: 55px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1020;
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Loading Animation */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 991.98px) {
+            .navbar-nav {
+                background: var(--bg-secondary);
+                backdrop-filter: var(--blur-md);
+                border-radius: 1rem;
+                padding: 1rem;
+                margin-top: 1rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .navbar-nav .nav-link {
+                margin: 0.25rem 0;
+                padding: 0.75rem 1rem !important;
+                border-radius: 0.5rem;
+                transition: all 0.3s ease;
+            }
+
+            .navbar-nav .nav-link:hover {
+                background: var(--bg-card);
+            }
+
+            .navbar-nav .nav-link::before {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .user-icon {
+                width: 38px;
+                height: 38px;
+            }
+        }
+
+          /* Enhanced user dropdown styling */
+    .user-icon-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .user-icon.dropdown-toggle::after {
+        display: none !important; /* remove default caret */
+    }
+
+    .user-icon img {
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: var(--bg-card);
+    }
+
+    .user-icon img:hover {
+        transform: scale(1.08);
+        border-color: var(--accent-primary);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .dropdown-menu.user-dropdown {
+        background: rgba(20, 20, 20, 0.95);
+        backdrop-filter: var(--blur-md);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        border-radius: 1rem;
+        overflow: hidden;
+        min-width: 200px;
+        animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .dropdown-menu.user-dropdown .dropdown-item {
+        color: var(--text-secondary);
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-menu.user-dropdown .dropdown-item:hover {
+        background: var(--bg-card);
+        color: var(--accent-primary);
+        transform: translateX(3px);
+    }
+
+    .dropdown-menu.user-dropdown .dropdown-item i {
+        width: 18px;
+        text-align: center;
+        opacity: 0.8;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-menu.user-dropdown {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateY(-5px);
+}
+
+.dropdown-menu.user-dropdown.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNavbar">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-dumbbell me-2"></i>FitnessPro
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/" data-page="home">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_login" data-page="member">
+                            <i class="fas fa-user me-1"></i>Member
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/trainer_login" data-page="trainer">
+                            <i class="fas fa-user-tie me-1"></i>Trainer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_login" data-page="admin">
+                            <i class="fas fa-cog me-1"></i>Admin
+                        </a>
+                    </li>
+                </ul>
+                
+<div class="user-icon-container dropdown">
+    {% if logged_in_user %}
+        <a href="#" class="user-icon dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="My Account">
+            <img src="{{ logged_in_user.image.url }}" alt="Profile" style="width:42px;height:42px;border-radius:50%;object-fit:cover;">
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userDropdown">
+            <li>
+                <a class="dropdown-item" href="/user_portal">
+                    <i class="fas fa-user-circle me-2"></i> My Profile
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="/change_password">
+                    <i class="fas fa-key me-2"></i> Change Password
+                </a>
+            </li>
+            <li>
+                <hr class="dropdown-divider bg-secondary opacity-25">
+            </li>
+            <li>
+                <a class="dropdown-item text-danger" href="/logout">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+            </li>
+        </ul>
+    {% else %}
+        <a href="/user_login" class="user-icon" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Login / Register">
+            <i class="fas fa-user"></i>
+        </a>
+    {% endif %}
+</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+<!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-section">
+                        <h6>
+                            <i class="fas fa-dumbbell me-2 gradient-text"></i>FitnessPro
+                        </h6>
+                        <p class="text-secondary mb-4">
+                            Transform your body and mind with our comprehensive fitness programs. Join thousands who have already started their transformation journey with us.
+                        </p>
+                        <div class="social-links">
+                            <a href="https://www.facebook.com/fahadali1078" target="_blank" class="glow-on-hover" data-bs-toggle="tooltip" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://x.com/FahadAli_0x" target="_blank" class="glow-on-hover" data-bs-toggle="tooltip" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://www.instagram.com/fahad_ali1078/" target="_blank" class="glow-on-hover" data-bs-toggle="tooltip" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/in/fahadali1078/" target="_blank" class="glow-on-hover" data-bs-toggle="tooltip" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6">
+                    <div class="footer-section">
+                        <h6>Quick Links</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="/"><i class="fas fa-angle-right me-2"></i>Home</a></li>
+                            <li class="mb-2"><a href="/user_login"><i class="fas fa-angle-right me-2"></i>Member Login</a></li>
+                            <li class="mb-2"><a href="/trainer_login"><i class="fas fa-angle-right me-2"></i>Trainer Login</a></li>
+                            <li class="mb-2"><a href="/admin_login"><i class="fas fa-angle-right me-2"></i>Admin Login</a></li>
+                            <li class="mb-2"><a href="/new_registration"><i class="fas fa-angle-right me-2"></i>Register</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-section">
+                        <h6>Services</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <a href="/#contact">
+                                    <i class="fas fa-angle-right me-2"></i>Personal Training
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="/#contact">
+                                    <i class="fas fa-angle-right me-2"></i>Group Classes
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="/#contact">
+                                    <i class="fas fa-angle-right me-2"></i>Nutrition Coaching
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="/#contact">
+                                    <i class="fas fa-angle-right me-2"></i>Fitness Assessment
+                                </a>
+                            </li>
+                            <li class="mb-2">
+                                <a href="/#contact">
+                                    <i class="fas fa-angle-right me-2"></i>Online Training
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-section">
+                        <h6>Contact Info</h6>
+                        <div class="contact-info">
+                            {% if gym_info %}
+                                <!-- Dynamic Gym Info from Database -->
+                                <p class="mb-2">
+                                    <i class="fas fa-map-marker-alt me-2 gradient-text"></i>
+                                    {{ gym_info.address }}
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-phone me-2 gradient-text"></i>
+                                    <a href="tel:{{ gym_info.phone_number|cut:' '|cut:'-' }}">{{ gym_info.phone_number }}</a>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-envelope me-2 gradient-text"></i>
+                                    <a href="mailto:{{ gym_info.email }}">{{ gym_info.email }}</a>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-clock me-2 gradient-text"></i>
+                                    {{ gym_info.operating_hours }}
+                                </p>
+                            {% else %}
+                                <!-- Fallback Default Contact Info -->
+                                <p class="mb-2">
+                                    <i class="fas fa-map-marker-alt me-2 gradient-text"></i>
+                                    Lahore, Pakistan
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-phone me-2 gradient-text"></i>
+                                    <a href="tel:+923270688791">+92 327 0688791</a>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-envelope me-2 gradient-text"></i>
+                                    <a href="mailto:fahad1078397@gmail.com">fahad1078397@gmail.com</a>
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-clock me-2 gradient-text"></i>
+                                    Mon-Sun: 5:00 AM - 11:00 PM
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0">&copy; 2025 FitnessPro. All Rights Reserved.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <p class="mb-0">
+                            Developed with <i class="fas fa-heart text-danger"></i> by 
+                            <a href="https://fahad-ali-github.github.io/FAHAD-ALI-Portfolio/" target="_blank">FAHAD ALI</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" data-bs-toggle="tooltip" data-bs-placement="left" title="Back to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        // Initialize AOS
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 1000,
+                once: true,
+                offset: 100,
+                easing: 'ease-out-cubic'
+            });
+
+            // Initialize Tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Page Loader
+            const pageLoader = document.getElementById('pageLoader');
+            setTimeout(() => {
+                pageLoader.style.opacity = '0';
+                setTimeout(() => {
+                    pageLoader.style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('mainNavbar');
+            const backToTop = document.getElementById('backToTop');
+            
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            // Back to top button
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+        });
+
+        // Back to top functionality
+        document.getElementById('backToTop').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Active navigation state
+        const currentLocation = location.pathname;
+        const menuItems = document.querySelectorAll('.navbar-nav .nav-link');
+        menuItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === currentLocation) {
+                item.classList.add('active');
+            }
+        });
+
+        // Navbar collapse on mobile after clicking link
+        document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                const navbarCollapse = document.querySelector('.navbar-collapse');
+                if (navbarCollapse.classList.contains('show')) {
+                    bootstrap.Collapse.getInstance(navbarCollapse).hide();
+                }
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+    const userDropdown = document.querySelector('#userDropdown');
+    const dropdownMenu = document.querySelector('.user-dropdown');
+    let bsDropdown;
+    let manuallyOpened = false; // to track if user clicked to open it
+
+    if (userDropdown && dropdownMenu) {
+        bsDropdown = new bootstrap.Dropdown(userDropdown, { autoClose: false });
+
+        // --- Show on hover (but only if not manually clicked) ---
+        userDropdown.addEventListener('mouseenter', () => {
+            if (!manuallyOpened) bsDropdown.show();
+        });
+
+        dropdownMenu.addEventListener('mouseenter', () => {
+            if (!manuallyOpened) bsDropdown.show();
+        });
+
+        // --- Close when mouse leaves only if NOT manually clicked ---
+        userDropdown.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!manuallyOpened && !dropdownMenu.matches(':hover')) {
+                    bsDropdown.hide();
+                }
+            }, 200);
+        });
+
+        dropdownMenu.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!manuallyOpened && !userDropdown.matches(':hover')) {
+                    bsDropdown.hide();
+                }
+            }, 200);
+        });
+
+        // --- Toggle open/close when user clicks the icon ---
+        userDropdown.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isOpen = dropdownMenu.classList.contains('show');
+            manuallyOpened = !isOpen; // if open → next click closes
+            bsDropdown.toggle();
+        });
+
+        // --- Close dropdown when clicking outside of it ---
+        document.addEventListener('click', (event) => {
+            const isClickInside =
+                userDropdown.contains(event.target) || dropdownMenu.contains(event.target);
+            if (!isClickInside) {
+                bsDropdown.hide();
+                manuallyOpened = false;
+            }
+        });
+    }
+});
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

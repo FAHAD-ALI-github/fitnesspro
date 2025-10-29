@@ -1,0 +1,109 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}All Trainers - FitnessPro Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4" data-aos="fade-down">
+        <div class="col-md-6">
+            <h1 class="gradient-text"><i class="fas fa-chalkboard-teacher me-2"></i>All Trainers</h1>
+            <p class="text-secondary">Manage gym trainers</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'add_trainer' %}" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>Add New Trainer
+            </a>
+        </div>
+    </div>
+
+    <!-- Trainers Count -->
+    <div class="row mb-3" data-aos="fade-right">
+        <div class="col-12">
+            <h5 class="text-secondary">Total Trainers: {{ trainers.count }}</h5>
+        </div>
+    </div>
+
+    <!-- Trainers Grid -->
+    <div class="row" data-aos="fade-up" data-aos-delay="100">
+        {% if trainers %}
+            {% for trainer in trainers %}
+            <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="dashboard-card">
+                    <div class="text-center mb-3">
+                        {% if trainer.image %}
+                            <img src="{{ trainer.image.url }}" alt="{{ trainer.first_name }}" 
+                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-primary);">
+                        {% else %}
+                            <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-gradient); 
+                                        display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 600; border: 3px solid var(--accent-primary);">
+                                {{ trainer.first_name.0 }}{{ trainer.last_name.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h4 class="text-center mb-2">{{ trainer.first_name }} {{ trainer.last_name }}</h4>
+                    
+                    {% if trainer.specialization %}
+                    <p class="text-center text-secondary mb-3">
+                        <i class="fas fa-dumbbell me-2"></i>{{ trainer.specialization }}
+                    </p>
+                    {% endif %}
+
+                    <hr style="border-color: var(--border-color);">
+
+                    <div class="mb-2">
+                        <i class="fas fa-user text-secondary me-2"></i>
+                        <strong>Username:</strong> {{ trainer.username }}
+                    </div>
+
+                    <div class="mb-2">
+                        <i class="fas fa-phone text-secondary me-2"></i>
+                        <strong>Phone:</strong> {{ trainer.phone_number }}
+                    </div>
+
+                    {% if trainer.email %}
+                    <div class="mb-3">
+                        <i class="fas fa-envelope text-secondary me-2"></i>
+                        <strong>Email:</strong> {{ trainer.email }}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <i class="fas fa-users text-secondary me-2"></i>
+                        <strong>Assigned Members:</strong> {{ trainer.assigned_members.count }}
+                    </div>
+
+                    <div class="mb-2">
+                        <i class="fas fa-calendar text-secondary me-2"></i>
+                        <strong>Joined:</strong> {{ trainer.created_at|date:"M d, Y" }}
+                    </div>
+
+                    <hr style="border-color: var(--border-color);">
+
+                    <div class="text-center">
+                        <a href="{% url 'delete_trainer' trainer.id %}" 
+                           class="btn btn-danger btn-sm" 
+                           onclick="return confirm('Are you sure you want to delete {{ trainer.first_name }} {{ trainer.last_name }}? This will unassign all their members.')">
+                            <i class="fas fa-trash me-1"></i>Delete Trainer
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="dashboard-card text-center py-5">
+                    <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                    <h4   style = "color : var(--text-muted)"  >No trainers found</h4>
+                    <p class="text-secondary">Start by adding your first trainer</p>
+                    <a href="{% url 'add_trainer' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-user-plus me-2"></i>Add New Trainer
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

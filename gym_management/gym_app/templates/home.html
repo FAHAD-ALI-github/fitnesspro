@@ -1,0 +1,1161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FitnessPro - Transform Your Body, Transform Your Life{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    min-height: 100vh;
+    
+    background: 
+        linear-gradient(135deg, rgba(10, 10, 10, 0.8) 0%, rgba(26, 26, 26, 0.9) 100%),
+        url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(10, 10, 10, 0.4) 100%);
+    z-index: 1;
+}
+
+.hero-content {
+    margin-top: 50px;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(102, 126, 234, 0.1);
+    backdrop-filter: var(--blur-sm);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 2rem;
+    padding: 0.4rem 1.2rem;
+    color: var(--accent-primary);
+    font-size: clamp(0.75rem, 2vw, 0.875rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.75rem, 5vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.hero-title .gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+}
+.hero-subtitle {
+    font-size: clamp(0.9rem, 2vw, 1.25rem);
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.hero-description {
+    font-size: clamp(0.85rem, 1.8vw, 1rem); 
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6; /* also tightened a bit */
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+    .hero-cta {
+        display: flex;
+        flex-direction: column;
+        flex-direction: row;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        animation: fadeInUp 0.8s ease-out 0.8s both;
+    }
+
+    .cta-primary {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1rem 2.5rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 3rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-md);
+    }
+
+    .cta-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .cta-primary:hover::before {
+        left: 100%;
+    }
+
+    .cta-primary:hover {
+        color: white;
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .cta-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        padding: 1rem 2.5rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        border: 2px solid var(--border-hover);
+        border-radius: 3rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: var(--blur-sm);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .cta-secondary:hover {
+        color: white;
+        border-color: var(--accent-primary);
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Floating Animation Elements */
+    .floating-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .floating-element {
+        position: absolute;
+        color: rgba(102, 126, 234, 0.1);
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .floating-element:nth-child(1) {
+        top: 15%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .floating-element:nth-child(2) {
+        top: 60%;
+        right: 15%;
+        animation-delay: 2s;
+    }
+
+    .floating-element:nth-child(3) {
+        bottom: 25%;
+        left: 20%;
+        animation-delay: 4s;
+    }
+
+    .floating-element:nth-child(4) {
+        top: 30%;
+        right: 30%;
+        animation-delay: 6s;
+    }
+
+    /* Feature Cards Section */
+    .features-section {
+        padding: 8rem 0;
+        background: var(--bg-secondary);
+        position: relative;
+    }
+
+    .features-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--primary-gradient);
+        opacity: 0.3;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 5rem;
+    }
+
+    .section-badge {
+        display: inline-block;
+        background: rgba(102, 126, 234, 0.1);
+        color: var(--accent-primary);
+        padding: 0.5rem 1.5rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .section-description {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 4rem;
+    }
+
+    .feature-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-md);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-12px);
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .feature-card:hover::before {
+        opacity: 1;
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto 2rem;
+        transition: transform 0.4s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .feature-description {
+        color: var(--text-secondary);
+        line-height: 1.7;
+    }
+
+    /* Healthy Mind Section */
+    .healthy-section {
+        padding: 8rem 0;
+        background: var(--bg-primary);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .healthy-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+        opacity: 0.05;
+    }
+
+    .healthy-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .healthy-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        margin-bottom: 2rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .healthy-text {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        line-height: 1.8;
+        margin-bottom: 3rem;
+    }
+
+    /* BMI Calculator Section */
+    .bmi-section {
+        padding: 8rem 0;
+        background: 
+            linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%),
+            url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+        position: relative;
+    }
+
+    .bmi-calculator {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-lg);
+        border: 1px solid var(--border-color);
+        border-radius: 2rem;
+        padding: 3rem;
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bmi-calculator::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary-gradient);
+        opacity: 0.7;
+    }
+
+    .bmi-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.25rem 1.5rem;
+        color: var(--text-primary);
+        font-size: 1.125rem;
+        width: 100%;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .bmi-input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .bmi-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .calculate-button {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.25rem 2rem;
+        border: none;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 1.125rem;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .calculate-button:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .bmi-result {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        text-align: center;
+        display: none;
+        animation: slideInUp 0.5s ease;
+    }
+
+    .bmi-result.show {
+        display: block;
+    }
+
+    .bmi-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--accent-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .bmi-category {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .bmi-description {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* Trainers Section */
+    .trainers-section {
+        padding: 8rem 0;
+        background: var(--bg-secondary);
+    }
+
+    .trainers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2.5rem;
+        margin-top: 4rem;
+    }
+
+    .trainer-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-md);
+        border: 1px solid var(--border-color);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .trainer-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .trainer-card:hover {
+        transform: translateY(-15px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--border-hover);
+    }
+
+    .trainer-card:hover::before {
+        opacity: 1;
+    }
+
+    .trainer-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--accent-primary);
+        margin: 0 auto 1.5rem;
+        transition: transform 0.4s ease;
+    }
+
+    .trainer-card:hover .trainer-image {
+        transform: scale(1.05);
+        border-color: var(--accent-secondary);
+    }
+
+    .trainer-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .trainer-specialty {
+        color: var(--accent-primary);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 1px;
+    }
+
+    /* Contact Section */
+    .contact-section {
+        padding: 8rem 0;
+        background: var(--bg-primary);
+    }
+
+    .contact-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+    }
+
+    .contact-image {
+        border-radius: 2rem;
+        box-shadow: var(--shadow-lg);
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .contact-form {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-lg);
+        border: 1px solid var(--border-color);
+        border-radius: 2rem;
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-form::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary-gradient);
+        opacity: 0.7;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        color: var(--text-primary);
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: rgb(46, 46, 46);
+        color: aliceblue;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .submit-button {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 2rem;
+        font-weight: 700;
+        font-size: 1.125rem;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-30px) rotate(180deg);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-cta {
+            flex-direction: column;
+        }
+        
+        .contact-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .trainers-grid,
+        .feature-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .bmi-calculator {
+            padding: 2rem;
+        }
+        
+        .contact-form {
+            padding: 2rem;
+        }
+    }
+
+    /* Dark mode specific adjustments */
+    @media (prefers-color-scheme: dark) {
+        .hero-section {
+            background-blend-mode: multiply;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section id="home" class="hero-section">
+    <div class="floating-elements">
+        <div class="floating-element">
+            <i class="fas fa-dumbbell fa-4x"></i>
+        </div>
+        <div class="floating-element">
+            <i class="fas fa-heartbeat fa-3x"></i>
+        </div>
+        <div class="floating-element">
+            <i class="fas fa-running fa-3x"></i>
+        </div>
+        <div class="floating-element">
+            <i class="fas fa-trophy fa-3x"></i>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="fas fa-star me-2"></i>
+                        Premium Fitness Experience
+                    </div>
+                    
+                    <h1 class="hero-title">
+                        Transform Your
+                        <span class="gradient-text">FitnessPro</span>
+                        Journey
+                    </h1>
+                    
+                    <p class="hero-subtitle">
+                        Unleash Your Potential with Expert Training
+                    </p>
+                    
+                    <p class="hero-description">
+                        Experience the future of fitness with cutting-edge equipment, world-class trainers, 
+                        and personalized programs designed to transform not just your body, but your entire lifestyle.
+                    </p>
+                    
+                    <div class="hero-cta">
+                        <a href="/new_registration" class="cta-primary">
+                            <i class="fas fa-rocket me-2"></i>
+                            Start Your Journey
+                        </a>
+                        <a href="#features" class="cta-secondary">
+                            <i class="fas fa-play me-2"></i>
+                            Discover More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">Why Choose FitnessPro</span>
+            <h2 class="section-title">Elevate Your Fitness Experience</h2>
+            <p class="section-description">
+                Discover what makes FitnessPro the ultimate destination for fitness enthusiasts 
+                who demand excellence in every aspect of their training journey.
+            </p>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h3 class="feature-title">Premium Equipment</h3>
+                <p class="feature-description">
+                    State-of-the-art fitness equipment from industry leaders, meticulously maintained 
+                    and regularly updated to ensure optimal performance and safety for all members.
+                </p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-apple-alt"></i>
+                </div>
+                <h3 class="feature-title">Nutrition Mastery</h3>
+                <p class="feature-description">
+                    Comprehensive nutritional guidance from certified experts who create personalized 
+                    meal plans to fuel your workouts and accelerate your transformation journey.
+                </p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3 class="feature-title">Custom Diet Plans</h3>
+                <p class="feature-description">
+                    Tailored nutrition strategies designed by registered dietitians to complement your 
+                    fitness goals and dietary preferences for maximum results.
+                </p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <h3 class="feature-title">Elite Training</h3>
+                <p class="feature-description">
+                    Professional athletic training programs and specialized coaching for various sports 
+                    and competitive fitness disciplines to elevate your performance.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Healthy Mind Section -->
+<section class="healthy-section">
+    <div class="healthy-bg"></div>
+    <div class="container">
+        <div class="healthy-content" data-aos="fade-up">
+            <h2 class="healthy-title">A Healthy Body Owns A Healthy Mind</h2>
+            <p class="healthy-text">
+                Experience the profound connection between physical fitness and mental wellness. Our holistic approach 
+                to health goes beyond building muscle and burning calories—we're dedicated to transforming your entire 
+                well-being. Discover how proper exercise, nutrition, and mindfulness practices work together to enhance 
+                your cognitive function, boost confidence, reduce stress, and unlock your full potential in every aspect of life.
+            </p>
+            <a href="https://www.coursera.org/learn/the-science-of-well-being" target="_blank" class="cta-primary">
+                <i class="fas fa-brain me-2"></i>
+                Explore Wellness Programs
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- BMI Calculator Section -->
+<section class="bmi-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="section-header text-center" data-aos="fade-up">
+                    <span class="section-badge" style="color: white;">Health Assessment</span>
+                    <h2 class="section-title" style="color: white;">
+                        Calculate Your <span class="gradient-text">Body Mass Index</span>
+                    </h2>
+                    <p class="section-description" style="color: var(--text-secondary);">
+                        Get instant insights into your health status with our advanced BMI calculator. 
+                        Take the first step towards your transformation journey.
+                    </p>
+                </div>
+                
+                <div class="bmi-calculator" data-aos="fade-up" data-aos-delay="200">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Weight (Kg)</label>
+                                <input type="number" class="bmi-input" id="weight" placeholder="Enter your weight" min="1" max="500">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Height (cm)</label>
+                                <input type="number" class="bmi-input" id="height" placeholder="Enter your height" min="50" max="300">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="calculate-button" onclick="calculateBMI()">
+                                <i class="fas fa-calculator me-2"></i>Calculate BMI
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bmi-result" id="result">
+                                <div class="bmi-value" id="bmiValue">--</div>
+                                <div class="bmi-category" id="bmiCategory">Your Category</div>
+                                <div class="bmi-description" id="bmiDescription">Enter your details to see results</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trainers Section -->
+<section class="trainers-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">Expert Team</span>
+            <h2 class="section-title">Meet Our Elite Trainers</h2>
+            <p class="section-description">
+                Our certified professionals bring years of experience and passion to guide you 
+                through every step of your fitness transformation journey.
+            </p>
+        </div>
+        
+        <div class="trainers-grid">
+            {% for trainer in trainers %}
+            <div class="trainer-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'0' }}00">
+                {% if trainer.image %}
+                    <img src="{{ trainer.image.url }}" alt="{{ trainer.first_name }} {{ trainer.last_name }}" class="trainer-image">
+                {% else %}
+                    <img src="{% static 'images/trainer-default.jpg' %}" alt="{{ trainer.first_name }} {{ trainer.last_name }}" class="trainer-image">
+                {% endif %}
+                <h3 class="trainer-name">{{ trainer.first_name }} {{ trainer.last_name }}</h3>
+                <div class="trainer-specialty">
+                    {% if trainer.specialization %}
+                        {{ trainer.specialization }}
+                    {% else %}
+                        Fitness Trainer
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p   style = "color : var(--text-muted)"  >No trainers available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="contact-section">
+    <div class="container">
+        <div class="section-header text-center mb-5" data-aos="fade-up">
+            <span class="section-badge">Get In Touch</span>
+            <h2 class="section-title">Ready To Transform?</h2>
+            <p class="section-description">
+                Take the first step towards your fitness goals. Our team is ready to help you 
+                create a personalized plan that fits your lifestyle and objectives.
+            </p>
+        </div>
+        
+        <div class="contact-container" data-aos="fade-up" data-aos-delay="200">
+            <div>
+                <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                     alt="Fitness consultation" class="contact-image">
+            </div>
+            
+            <div class="contact-form">
+                <h3 class="mb-4" style="color: var(--text-primary); font-family: 'Space Grotesk', sans-serif;">
+                    Start Your Journey Today
+                </h3>
+                
+                <!-- only changes: added action + method -->
+                <form id="contactForm" action="https://formspree.io/f/{{ FORMSPREE_ID }}" method="POST" novalidate>
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="name" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone" placeholder="Enter your phone number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" name="message" placeholder="Tell us about your fitness goals..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-button">
+                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                    </button>
+
+                    <!-- status and field-level errors will appear here -->
+                    <p id="formStatus" aria-live="polite" style="margin-top:15px; font-weight:600;"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced BMI Calculator
+function calculateBMI() {
+    const heightInput = document.getElementById("height");
+    const weightInput = document.getElementById("weight");
+    const resultDiv = document.getElementById("result");
+    const bmiValue = document.getElementById("bmiValue");
+    const bmiCategory = document.getElementById("bmiCategory");
+    const bmiDescription = document.getElementById("bmiDescription");
+    
+    const height = parseFloat(heightInput.value);
+    const weight = parseFloat(weightInput.value);
+    
+    // Validation
+    if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
+        showBMIResult("--", "Invalid Input", "Please enter valid height and weight values.", "#ff4757");
+        return;
+    }
+    
+    if (height < 50 || height > 300) {
+        showBMIResult("--", "Invalid Height", "Height should be between 50-300 cm.", "#ff4757");
+        return;
+    }
+    
+    if (weight < 1 || weight > 500) {
+        showBMIResult("--", "Invalid Weight", "Weight should be between 1-500 kg.", "#ff4757");
+        return;
+    }
+    
+    // Calculate BMI
+    const bmi = weight / ((height / 100) ** 2);
+    let category = "";
+    let description = "";
+    let color = "";
+    
+    if (bmi < 18.5) {
+        category = "Underweight";
+        description = "Consider consulting with a nutritionist to develop a healthy weight gain plan.";
+        color = "#ffa502";
+    } else if (bmi >= 18.5 && bmi < 25) {
+        category = "Normal Weight";
+        description = "Great! You're in the healthy weight range. Maintain with regular exercise.";
+        color = "#2ed573";
+    } else if (bmi >= 25 && bmi < 30) {
+        category = "Overweight";
+        description = "Consider a balanced diet and regular exercise to reach optimal health.";
+        color = "#ffa502";
+    } else {
+        category = "Obese";
+        description = "We recommend consulting with healthcare professionals for a personalized plan.";
+        color = "#ff4757";
+    }
+    
+    showBMIResult(bmi.toFixed(1), category, description, color);
+}
+
+function showBMIResult(value, category, description, color) {
+    const resultDiv = document.getElementById("result");
+    const bmiValue = document.getElementById("bmiValue");
+    const bmiCategory = document.getElementById("bmiCategory");
+    const bmiDescription = document.getElementById("bmiDescription");
+    
+    bmiValue.textContent = value;
+    bmiCategory.textContent = category;
+    bmiDescription.textContent = description;
+    
+    bmiValue.style.color = color;
+    bmiCategory.style.color = color;
+    
+    resultDiv.classList.add("show");
+}
+
+// Form submission handling
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    const statusElement = document.getElementById('formStatus');
+    
+    // Disable button and show loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+    statusElement.textContent = '';
+    
+    try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            statusElement.textContent = 'Thank you! Your message has been sent successfully.';
+            statusElement.style.color = '#2ed573';
+            form.reset();
+        } else {
+            throw new Error('Form submission failed');
+        }
+    } catch (error) {
+        statusElement.textContent = 'Sorry, there was an error sending your message. Please try again later.';
+        statusElement.style.color = '#ff4757';
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    }
+});
+
+// Smooth scrolling for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// AOS initialization for scroll animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS if available
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    }
+});
+</script>
+{% endblock %}

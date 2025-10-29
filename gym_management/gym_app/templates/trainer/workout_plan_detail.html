@@ -1,0 +1,31 @@
+{% extends 'base_trainer.html' %}
+{% block title %}{{ workout_plan.name }}{% endblock %}
+{% block content %}
+<h2 class="gradient-text mb-4">{{ workout_plan.name }}</h2>
+<p>{{ workout_plan.description }}</p>
+<p><strong>Difficulty:</strong> {{ workout_plan.difficulty_level|title }}</p>
+
+<h4 class="mt-4 mb-3">Workout Schedule</h4>
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>Exercises</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for day in workout_days %}
+      <tr>
+        <td>{{ day.day_name }}</td>
+        <td>{{ day.exercises }}</td>
+        <td>{{ day.notes }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">No exercises added yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

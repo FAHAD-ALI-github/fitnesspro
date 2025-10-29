@@ -1,0 +1,35 @@
+{% extends 'base_trainer.html' %}
+{% block title %}{{ diet_plan.name }}{% endblock %}
+{% block content %}
+<h2 class="gradient-text mb-4">{{ diet_plan.name }}</h2>
+<p>{{ diet_plan.description }}</p>
+<p><strong>Total Calories:</strong> {{ diet_plan.total_calories|default:"N/A" }}</p>
+
+<h4 class="mt-4 mb-3">Diet Schedule</h4>
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Day</th>
+        <th>Breakfast</th>
+        <th>Lunch</th>
+        <th>Dinner</th>
+        <th>Snacks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for day in diet_days %}
+      <tr>
+        <td>{{ day.day_name }}</td>
+        <td>{{ day.breakfast|default:"-" }}</td>
+        <td>{{ day.lunch|default:"-" }}</td>
+        <td>{{ day.dinner|default:"-" }}</td>
+        <td>{{ day.snacks|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No diet plan added yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base_trainer.html' %}
+{% block title %}Trainer Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <h2 class="mb-4 gradient-text">Trainer Dashboard</h2>
+  <div class="row g-4">
+    <div class="col-md-4" data-aos="fade-up">
+      <a href="{% url 'trainer_clients' %}" class="dashboard-card text-center">
+        <div class="card-icon bg-primary"><i class="fas fa-users"></i></div>
+        <h4>Manage Clients</h4>
+      </a>
+    </div>
+    <div class="col-md-4" data-aos="fade-up">
+      <a href="{% url 'create_workout_plan_page' %}" class="dashboard-card text-center">
+        <div class="card-icon bg-success"><i class="fas fa-dumbbell"></i></div>
+        <h4>Create Workout Plan</h4>
+      </a>
+    </div>
+    <div class="col-md-4" data-aos="fade-up">
+      <a href="{% url 'create_diet_plan_page' %}" class="dashboard-card text-center">
+        <div class="card-icon bg-warning"><i class="fas fa-apple-alt"></i></div>
+        <h4>Create Diet Plan</h4>
+      </a>
+    </div>
+    <div class="col-md-4" data-aos="fade-up">
+      <a href="{% url 'trainer_workout_plans' %}" class="dashboard-card text-center">
+        <div class="card-icon bg-info"><i class="fas fa-clipboard-list"></i></div>
+        <h4>My Workout Plans</h4>
+      </a>
+    </div>
+    <div class="col-md-4" data-aos="fade-up">
+      <a href="{% url 'trainer_diet_plans' %}" class="dashboard-card text-center">
+        <div class="card-icon bg-danger"><i class="fas fa-utensils"></i></div>
+        <h4>My Diet Plans</h4>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

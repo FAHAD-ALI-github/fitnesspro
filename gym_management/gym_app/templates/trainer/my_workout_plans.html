@@ -1,0 +1,18 @@
+{% extends 'base_trainer.html' %}
+{% block title %}My Workout Plans{% endblock %}
+{% block content %}
+<h2 class="gradient-text mb-4">My Workout Plans</h2>
+<div class="row g-4">
+  {% for plan in workout_plans %}
+  <div class="col-md-6">
+    <a href="{% url 'workout_plan_detail' plan.id %}" class="dashboard-card d-block text-decoration-none text-light">
+      <h4>{{ plan.name }}</h4>
+      <p>{{ plan.description }}</p>
+      <small>Level: {{ plan.difficulty_level|title }}</small>
+    </a>
+  </div>
+  {% empty %}
+  <p>No workout plans created yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

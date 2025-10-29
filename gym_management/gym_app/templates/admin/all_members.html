@@ -1,0 +1,223 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}All Members - FitnessPro Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid all-members-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-11 col-sm-12">
+            
+            <!-- Page Header -->
+            <div class="row mb-4 text-center text-md-start" data-aos="fade-down">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h1 class="gradient-text"><i class="fas fa-users me-2"></i>All Members</h1>
+                    <p class="text-secondary">Manage and search gym members</p>
+                </div>
+                <div class="col-md-6 text-md-end text-center">
+                    <a href="{% url 'new_registration' %}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Add New Member
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="row mb-4 justify-content-center" data-aos="fade-up">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <form method="GET" action="{% url 'all_members' %}">
+                            <div class="row align-items-end gy-3">
+                                <div class="col-md-8 col-sm-12">
+                                    <label for="search" class="form-label">
+                                        <i class="fas fa-search me-2"></i>Search Members
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="q" 
+                                        id="search" 
+                                        class="form-control" 
+                                        placeholder="Search by name, username, or phone number..." 
+                                        value="{{ query }}"
+                                    >
+                                </div>
+                                <div class="col-md-4 col-sm-12">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-2"></i>Search
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Members Count -->
+            <div class="row mb-3 text-center text-md-start" data-aos="fade-right">
+                <div class="col-12">
+                    <h5 class="text-secondary">
+                        {% if query %}
+                            Search Results: {{ members.count }} member(s) found
+                        {% else %}
+                            Total Members: {{ members.count }}
+                        {% endif %}
+                    </h5>
+                </div>
+            </div>
+
+            <!-- Members Table -->
+            <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-12">
+                    {% if members %}
+                    <div class="table-responsive">
+                        <table class="table align-middle text-center">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Membership</th>
+                                    <th>Trainer</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in members %}
+                                <tr>
+                                    <td>{{ member.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                                            {% if member.image %}
+                                                <img src="{{ member.image.url }}" alt="{{ member.first_name }}" 
+                                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                                            {% else %}
+                                                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-gradient); 
+                                                            display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: 600;">
+                                                    {{ member.first_name.0 }}{{ member.last_name.0 }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ member.first_name }} {{ member.last_name }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ member.username }}</td>
+                                    <td>{{ member.phone_number }}</td>
+                                    <td>{{ member.email|default:"N/A" }}</td>
+                                    <td>
+                                        {% if member.membership_plan %}
+                                            <span class="badge badge-info">{{ member.membership_plan.name }}</span>
+                                            <br>
+                                            <small   style = "color : var(--text-muted)"  >PKR {{ member.membership_plan.price }}</small>
+                                        {% else %}
+                                            <span class="badge badge-warning">No Plan</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if member.assigned_trainer %}
+                                            {{ member.assigned_trainer.first_name }} {{ member.assigned_trainer.last_name }}
+                                        {% else %}
+                                            <span   style = "color : var(--text-muted)"  >Not Assigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if member.membership_end_date %}
+                                            {% if member.membership_end_date >= today %}
+                                                <span class="badge badge-success">Active</span>
+                                                <br>
+                                                <small   style = "color : var(--text-muted)"  >Until {{ member.membership_end_date }}</small>
+                                            {% else %}
+                                                <span class="badge badge-danger">Expired</span>
+                                                <br>
+                                                <small   style = "color : var(--text-muted)"  >{{ member.membership_end_date }}</small>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge badge-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'delete_member' member.id %}" 
+                                           class="btn btn-sm btn-danger" 
+                                           onclick="return confirm('Are you sure you want to delete {{ member.first_name }} {{ member.last_name }}?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="dashboard-card text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h4   style = "color : var(--text-muted)"  >No members found</h4>
+                        {% if query %}
+                        <p class="text-secondary">Try a different search term</p>
+                        <a href="{% url 'all_members' %}" class="btn btn-primary mt-3">
+                            <i class="fas fa-arrow-left me-2"></i>View All Members
+                        </a>
+                        {% else %}
+                        <p class="text-secondary">Start by adding your first member</p>
+                        <a href="{% url 'new_registration' %}" class="btn btn-primary mt-3">
+                            <i class="fas fa-user-plus me-2"></i>Add New Member
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Centering and responsive improvements only */
+.all-members-page {
+    display: flex;
+    justify-content: center;
+margin-left: -70px;
+}
+
+.dashboard-card {
+    border-radius: 12px;
+    padding: 20px;
+}
+
+/* Make tables responsive on small screens */
+.table-responsive {
+    overflow-x: auto;
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .table th, .table td {
+        font-size: 13px;
+        padding: 10px;
+        white-space: nowrap;
+    }
+    .btn {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+    .gradient-text {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 576px) {
+    .all-members-page {
+        padding: 10px 5px;
+    }
+    .dashboard-card {
+        padding: 15px;
+    }
+}
+</style>
+
+<script>
+    // Store today's date for comparison
+    const today = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

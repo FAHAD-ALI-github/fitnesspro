@@ -1,0 +1,401 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - FitnessPro{% endblock %}
+{% block extra_css %}
+<style>
+/* Dark Theme Select Box Styling  */
+select.form-control {
+    background: rgba(30, 34, 45, 0.658); 
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 36px 8px 12px;
+    font-size: 15px;
+    font-weight: 500;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px); 
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23ffffff' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+}
+
+/* Hover effect */
+select.form-control:hover {
+    background: rgba(30, 34, 45, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Keep focus glow subtle but same background */
+select.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color, #0d6efd);
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.3);
+    background: rgba(30, 34, 45, 0.95);
+}
+
+/* Dropdown options (inside list) */
+select.form-control option {
+    background-color: #1c1f26;
+    color: #fff;
+}
+
+/* Light mode support */
+body.light-mode select.form-control {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%230d6efd' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Section -->
+    <div class="row mb-4" data-aos="fade-down">
+        <div class="col-12">
+            <h1 class="gradient-text mb-2">Welcome back, {{ admin.first_name }}!</h1>
+            <p class="text-secondary">Here's what's happening with your gym today</p>
+        </div>
+    </div>
+
+    <!-- Notifications Section -->
+    {% if pending_approvals or trainer_requests %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3" data-aos="fade-right"><i class="fas fa-bell me-2"></i>Notifications</h3>
+        </div>
+        
+        {% if pending_approvals %}
+        <div class="col-12 mb-4" data-aos="fade-up">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-circle me-2"></i>Pending Payment Approvals ({{ pending_count }})</h5>
+                <div class="table-responsive mt-3">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Membership Plan</th>
+                                <th>Payment Proof</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in pending_approvals %}
+                            <tr>
+                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                <td>{{ user.phone_number }}</td>
+                                <td>
+                                    {% if user.membership_plan %}
+                                        {{ user.membership_plan.name }} - PKR {{ user.membership_plan.price }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.payment_proof %}
+                                        <a href="{{ user.payment_proof.url }}" target="_blank" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                    {% else %}
+                                        No proof uploaded
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'approve_payment' user.id %}" class="btn btn-sm btn-success me-2">
+                                        <i class="fas fa-check me-1"></i>Approve
+                                    </a>
+                                    <a href="{% url 'reject_payment' user.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to reject this payment?')">
+                                        <i class="fas fa-times me-1"></i>Reject
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if trainer_requests %}
+        <div class="col-12 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-user-tie me-2"></i>Trainer Requests ({{ trainer_request_count }})</h5>
+                <div class="table-responsive mt-3">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Member Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Assign Trainer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in trainer_requests %}
+                            <tr>
+                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                <td>{{ user.phone_number }}</td>
+                                <td>{{ user.email|default:"N/A" }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'assign_trainer_to_member' %}" class="d-flex gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="member_id" value="{{ user.id }}">
+                                        <select name="trainer_id" class="form-control" required>
+                                            <option value="">Select Trainer</option>
+                                            {% for trainer in all_trainers %}
+                                            <option value="{{ trainer.id }}">{{ trainer.first_name }} {{ trainer.last_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Assign
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-12 mb-3" data-aos="fade-right">
+            <h3><i class="fas fa-chart-bar me-2"></i>Quick Stats</h3>
+        </div>
+        
+        <div class="col-md-3 mb-4" data-aos="fade-up">
+            <a href="{% url 'all_members' %}" class="dashboard-card">
+                <div class="card-icon bg-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h2 class="card-title">{{ total_members }}</h2>
+                <p class="card-subtitle">Total Members</p>
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <a href="{% url 'all_trainers' %}" class="dashboard-card">
+                <div class="card-icon bg-success">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h2 class="card-title">{{ total_trainers }}</h2>
+                <p class="card-subtitle">Total Trainers</p>
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="dashboard-card">
+                <div class="card-icon bg-warning">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <h2 class="card-title">{{ total_revenue }}</h2>
+                <p class="card-subtitle">Total Revenue (PKR)</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="dashboard-card">
+                <div class="card-icon bg-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h2 class="card-title">{{ pending_count }}</h2>
+                <p class="card-subtitle">Pending Approvals</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12 mb-3" data-aos="fade-right">
+            <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+        </div>
+
+        <div class="col-md-4 mb-3" data-aos="fade-up">
+            <a href="{% url 'new_registration' %}" class="dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-primary me-3">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Add New User</h5>
+                        <p class="text-secondary mb-0 small">Register a new member</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="100">
+            <a href="{% url 'add_trainer' %}" class="dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-success me-3">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Add New Trainer</h5>
+                        <p class="text-secondary mb-0 small">Create trainer account</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="200">
+            <a href="{% url 'trainer_attendance' %}" class="dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-info me-3">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Mark Attendance</h5>
+                        <p class="text-secondary mb-0 small">Record trainer attendance</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="300">
+            <a href="{% url 'all_members' %}" class="dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-primary me-3">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">View All Members</h5>
+                        <p class="text-secondary mb-0 small">Browse & search members</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="400">
+            <a href="{% url 'all_trainers' %}" class="dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-success me-3">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">View All Trainers</h5>
+                        <p class="text-secondary mb-0 small">Manage trainer profiles</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-3" data-aos="fade-up" data-aos-delay="500">
+            <a href="{% url 'progress_charts' %}" class="dashboard-card">
+                <div class="d-flex align-items-center">
+                    <div class="card-icon bg-warning me-3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">Progress Charts</h5>
+                        <p class="text-secondary mb-0 small">View analytics & reports</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Members Section -->
+    {% if all_members %}
+    <div class="row mb-4">
+        <div class="col-12 mb-3" data-aos="fade-right">
+            <h3><i class="fas fa-history me-2"></i>Recent Members</h3>
+        </div>
+        <div class="col-12" data-aos="fade-up">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Membership Plan</th>
+                            <th>Trainer</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in all_members|slice:":10" %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if member.image %}
+                                        <img src="{{ member.image.url }}" alt="{{ member.first_name }}" 
+                                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                                    {% else %}
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-gradient); 
+                                                    display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: 600;">
+                                            {{ member.first_name.0 }}{{ member.last_name.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ member.first_name }} {{ member.last_name }}</strong>
+                                        <br>
+                                        <small   style = "color : var(--text-muted)"  >{{ member.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if member.membership_plan %}
+                                    <span class="badge badge-info">{{ member.membership_plan.name }}</span>
+                                {% else %}
+                                    <span class="badge badge-warning">No Plan</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if member.assigned_trainer %}
+                                    {{ member.assigned_trainer.first_name }} {{ member.assigned_trainer.last_name }}
+                                {% else %}
+                                    <span   style = "color : var(--text-muted)"  >Not Assigned</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if member.membership_end_date %}
+                                    {% if member.membership_end_date >= today %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Expired</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'delete_member' member.id %}" 
+                                   class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('Are you sure you want to delete {{ member.first_name }} {{ member.last_name }}?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{% url 'all_members' %}" class="btn btn-primary">
+                    <i class="fas fa-users me-2"></i>View All Members
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Store today's date for comparison
+    const today = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

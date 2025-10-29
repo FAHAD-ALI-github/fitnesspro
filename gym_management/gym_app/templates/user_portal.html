@@ -1,0 +1,1340 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}User Portal - FitnessPro{% endblock %}
+
+{% block extra_css %}
+<style>
+
+    /* Portal-specific enhancements to parent theme */
+    .portal-container {
+        min-height: 100vh;
+        padding: 8rem 0 2rem;
+        position: relative;
+    }
+
+    .portal-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-md);
+        border: 1px solid var(--border-color);
+        border-radius: 2rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .portal-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--primary-gradient);
+        opacity: 0.7;
+    }
+
+    .portal-header {
+        background: var(--primary-gradient);
+        padding: 3rem 2rem 8rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .portal-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
+    }
+
+    .portal-avatar-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
+        cursor: pointer;
+    }
+
+    .portal-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 6px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), var(--shadow-lg);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        object-fit: cover;
+        position: relative;
+        z-index: 2;
+    }
+
+    .portal-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2), var(--shadow-glow);
+    }
+
+    .portal-avatar-container:hover::after {
+        content: 'Change Photo';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px;
+        font-size: 12px;
+        border-radius: 0 0 75px 75px;
+        z-index: 3;
+    }
+
+    .online-indicator {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        background: var(--accent-success);
+        border: 4px solid white;
+        border-radius: 50%;
+        z-index: 3;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(46, 213, 115, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(46, 213, 115, 0);
+        }
+    }
+
+    .portal-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .portal-username {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.25rem;
+    }
+
+    .portal-id {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        font-family: 'Space Grotesk', monospace;
+    }
+
+    .portal-body {
+        padding: 2rem;
+        position: relative;
+        margin-top: -6rem;
+        z-index: 2;
+    }
+
+    .portal-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .action-btn {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 0.75rem 1.5rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        min-width: 160px;
+        justify-content: center;
+    }
+
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .action-btn:hover::before {
+        left: 100%;
+    }
+
+    .action-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--border-hover);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        background: var(--bg-card-hover);
+    }
+
+    .portal-info {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .portal-info:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-hover);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        text-align: center;
+    }
+
+    .info-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: white;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+
+    .info-item:hover .info-icon {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .info-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+    .stat-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid var(--border-color);
+        border-radius: 1.25rem;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--primary-gradient);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+        transform: translateX(0);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .trainer-section {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .trainer-section:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-hover);
+    }
+
+    .trainer-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .trainer-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 3px solid var(--border-color);
+        object-fit: cover;
+    }
+
+    .trainer-details h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .trainer-details p {
+        margin: 0;
+        color: var(--text-secondary);
+    }
+
+    .trainer-specialization {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .cta-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .cta-card {
+        background: var(--bg-card);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-card::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: var(--primary-gradient);
+        border-radius: 1.5rem;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .cta-card:hover::before {
+        opacity: 1;
+    }
+
+    .cta-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .cta-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .cta-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .cta-btn {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 2rem;
+        padding: 0.875rem 2rem;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+        z-index: 1;
+    }
+
+    .cta-btn:hover::before {
+        left: 100%;
+    }
+
+    .cta-btn:hover {
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-glow);
+        filter: brightness(1.1);
+    }
+
+    .cta-btn.secondary {
+        background: var(--secondary-gradient);
+    }
+
+    /* BMI Status Colors */
+    .bmi-underweight { color: var(--accent-warning); }
+    .bmi-normal { color: var(--accent-success); }
+    .bmi-overweight { color: var(--accent-warning); }
+    .bmi-obese { color: var(--accent-danger); }
+
+    /* Warning Box */
+    .warning-box {
+        background: var(--warning-gradient);
+        backdrop-filter: var(--blur-sm);
+        border: 1px solid rgba(255, 165, 2, 0.3);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        color: var(--text-primary);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+
+    .modal-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+
+    .btn-close {
+        filter: invert(1);
+    }
+
+    .form-control {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus {
+        background: var(--bg-card);
+        border-color: var(--accent-primary);
+        color: var(--text-primary);
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+
+    .form-label {
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .portal-name {
+            font-size: 2rem;
+        }
+
+        .portal-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .portal-header {
+            padding: 2rem 1rem 6rem;
+        }
+
+        .portal-body {
+            margin-top: -4rem;
+        }
+
+        .trainer-info {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .portal-container {
+            padding: 6rem 0 1rem;
+        }
+
+        .portal-card {
+            margin: 0 1rem;
+            border-radius: 1.5rem;
+        }
+
+        .portal-avatar {
+            width: 120px;
+            height: 120px;
+        }
+
+        .portal-name {
+            font-size: 1.75rem;
+        }
+
+        .info-grid,
+        .stats-container,
+        .cta-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Entrance Animations */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 40px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .animate-slide-up {
+        animation: slideInUp 0.8s ease-out;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 1s ease-out;
+    }
+
+    .animate-delay-1 { animation-delay: 0.2s; animation-fill-mode: backwards; }
+    .animate-delay-2 { animation-delay: 0.4s; animation-fill-mode: backwards; }
+    .animate-delay-3 { animation-delay: 0.6s; animation-fill-mode: backwards; }
+    .animate-delay-4 { animation-delay: 0.8s; animation-fill-mode: backwards; }
+
+
+
+
+
+.upload-preview-container {
+    position: relative;
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 6px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1), var(--shadow-lg);
+}
+
+.upload-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: all 0.3s ease;
+}
+
+.upload-preview-container:hover .upload-preview {
+    transform: scale(1.05);
+}
+
+.preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+}
+
+.upload-preview-container:hover .preview-overlay {
+    opacity: 1;
+}
+
+.preview-overlay i {
+    color: white;
+    font-size: 1.5rem;
+}
+
+.preview-info {
+    font-size: 0.8rem;
+}
+
+.upload-restrictions {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.upload-restrictions h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.upload-restrictions ul li {
+    margin-bottom: 0.25rem;
+}
+
+/* File input styling */
+.form-control[type="file"] {
+    padding: 0.75rem;
+}
+
+.form-control[type="file"]::file-selector-button {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control[type="file"]::file-selector-button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Upload button styling */
+.upload-btn {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.upload-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading state */
+.upload-btn.loading {
+    pointer-events: none;
+}
+
+.upload-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 576px) {
+    .upload-preview-container {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .upload-restrictions {
+        padding: 0.75rem;
+    }
+    
+    .upload-restrictions ul {
+        font-size: 0.75rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Portal Container -->
+<div class="portal-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                {% if not user.is_approved %}
+                <div class="warning-box animate-slide-up">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Admin is approving your payment. Within 24 hours this warning will be removed.
+                </div>
+                {% endif %}
+
+                <div class="portal-card animate-slide-up">
+                    <!-- Portal Header -->
+                    <div class="portal-header">
+                        <div class="portal-avatar-container animate-fade-in animate-delay-1" id="avatar-container">
+                            <img src="{{user.image.url}}" alt="Profile Avatar" class="portal-avatar" id="profile-avatar">
+                            <div class="online-indicator"></div>
+                        </div>
+                        <h1 class="portal-name animate-fade-in animate-delay-2">{{user.first_name}} {{user.last_name}}</h1>
+                        <p class="portal-username animate-fade-in animate-delay-3">@{{user.username}}</p>
+                        <p class="portal-id animate-fade-in animate-delay-4">ID: #{{user.id}}</p>
+                    </div>
+
+                    <!-- Portal Body -->
+                    <div class="portal-body">
+                        <!-- Action Buttons -->
+                        <div class="portal-actions animate-slide-up animate-delay-1">
+                            <button class="action-btn" data-bs-toggle="modal" data-bs-target="#editInfoModal">
+                                <i class="fas fa-edit"></i>
+                                Edit Profile Info
+                            </button>
+                            {% if not user.trainer_requested and not user.assigned_trainer %}
+                            <a href="/request_trainer" class="action-btn">
+                                <i class="fas fa-user-plus"></i>
+                                Get a Trainer
+                            </a>
+                            {% endif %}
+                        </div>
+
+                        <!-- Profile Info -->
+                        <div class="portal-info animate-slide-up animate-delay-2">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">{{user.email|default:"Not set"}}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-phone"></i>
+                                    </div>
+                                    <div class="info-label">Phone</div>
+                                    <div class="info-value">{{user.phone_number|default:"Not set"}}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-weight-scale"></i>
+                                    </div>
+                                    <div class="info-label">Weight</div>
+                                    <div class="info-value">{{user.weight|default:"Not set"}} kg</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-ruler-vertical"></i>
+                                    </div>
+                                    <div class="info-label">Height</div>
+                                    <div class="info-value">{{user.height|default:"Not set"}} cm</div>
+                                </div>
+                            </div>
+                        </div>
+
+                       
+                        <!-- BMI Statistics -->
+                        <div class="stats-container animate-slide-up animate-delay-3">
+                            <div class="stat-card">
+                                <div class="stat-number" id="bmi-display">0</div>
+                                <div class="stat-label">BMI Score</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="bmi-status-display">Not set</div>
+                                <div class="stat-label">BMI Status</div>
+                            </div>
+                        </div>
+                        <!-- Trainer Section -->
+                        <div class="trainer-section animate-slide-up animate-delay-3">
+                            <h3 class="mb-4" style="color: var(--text-primary); font-family: 'Space Grotesk', sans-serif;">
+                                <i class="fas fa-dumbbell me-2"></i>My Trainer
+                            </h3>
+                            
+                            {% if user.assigned_trainer %}
+                            <div class="trainer-info">
+                                <img src="{{ user.assigned_trainer.image.url }}" alt="Trainer Avatar" class="trainer-avatar">
+                                <div class="trainer-details">
+                                    <h4>{{ user.assigned_trainer.first_name }} {{ user.assigned_trainer.last_name }}</h4>
+                                    {% if user.assigned_trainer.specialization %}
+                                    <span class="trainer-specialization">{{ user.assigned_trainer.specialization }}</span>
+                                    {% endif %}
+                                    <p class="mt-2">{{ user.assigned_trainer.email }}</p>
+                                </div>
+                            </div>
+                            {% elif user.trainer_requested %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-clock text-warning mb-3" style="font-size: 3rem;"></i>
+                                <h5 style="color: var(--text-secondary);">Trainer request pending...</h5>
+                                <p   style = "color : var(--text-muted)"  >Your request for a trainer is being processed</p>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-user-plus mb-3" style="font-size: 3rem; color : var(--text-muted);"></i>
+                                <h5 style="color: var(--text-secondary);">No Trainer Assigned</h5>
+                                <p   style = "color : var(--text-muted)"  >Get personalized training by requesting a trainer</p>
+                                <a href="/request_trainer" class="cta-btn mt-2">Request Trainer</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Call-to-Action Section -->
+                        <div class="cta-section animate-slide-up animate-delay-4">
+                            <div class="cta-card">
+                                <div class="cta-icon">
+                                    <i class="fas fa-dumbbell"></i>
+                                </div>
+                                <h3 class="cta-title">My Workout Plan</h3>
+                                <p class="text-secondary mb-3">
+                                    {% if user.assigned_workout_plan %}
+                                    View your personalized {{ user.assigned_workout_plan.difficulty_level }} workout plan
+                                    {% else %}
+                                    Get started with your fitness journey
+                                    {% endif %}
+                                </p>
+                                <a href="/workout_plan" class="cta-btn">
+                                    View Workout Plan
+                                </a>
+                            </div>
+                            <div class="cta-card">
+                                <div class="cta-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <h3 class="cta-title">My Diet Plan</h3>
+                                <p class="text-secondary mb-3">
+                                    {% if user.assigned_diet_plan %}
+                                    Follow your personalized nutrition plan
+                                    {% else %}
+                                    Discover healthy eating habits
+                                    {% endif %}
+                                </p>
+                                <a href="/diet_plan" class="cta-btn secondary">
+                                    View Diet Plan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Info Modal -->
+<div class="modal fade" id="editInfoModal" tabindex="-1" aria-labelledby="editInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInfoModalLabel">Update Personal Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="info-form" method="POST" action="/update_user_info">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number }}">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="weight" class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control" id="weight" name="weight" value="{{ user.weight }}" step="0.1" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="height" class="form-label">Height (cm)</label>
+                                <input type="number" class="form-control" id="height" name="height" value="{{ user.height }}" step="0.1" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="info-form" class="btn btn-primary">Update Information</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Update Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="avatar-form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="text-center mb-4">
+                        <div class="upload-preview-container">
+                            <img id="upload-preview" class="upload-preview" src="{{user.image.url}}" alt="Preview">
+                            <div class="preview-overlay">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                        </div>
+                        <div class="preview-info mt-2">
+                            <small   style = "color : var(--text-muted)"  >Preview will be cropped to circular shape</small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image-upload" class="form-label">Select New Image</label>
+                        <input class="form-control" type="file" id="image-upload" name="image" accept="image/*" required>
+                        <div class="form-text"   style = "color : var(--text-muted)"  >
+                            <i class="fas fa-info-circle me-1"></i>
+                            Recommended: Square image (1:1 ratio), max 5MB
+                        </div>
+                    </div>
+                    <div class="upload-restrictions">
+                        <h6 class="mb-2">Image Requirements:</h6>
+                        <ul class="list-unstyled small" style = "color : var(--text-muted)">
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Format: JPG, PNG, GIF, WebP</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Max size: 5MB</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Optimal: 300x300 pixels (1:1 ratio)</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Will be cropped to circular shape</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary upload-btn" id="upload-submit">Upload Picture</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enhanced hover effects for cards
+    const cards = document.querySelectorAll('.stat-card, .cta-card, .action-btn, .info-item');
+    
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Dynamic stats counter animation
+    function animateCounter(element, target, duration = 2000) {
+        const start = 0;
+        const startTime = performance.now();
+        
+        function updateCounter(currentTime) {
+            const elapsedTime = currentTime - startTime;
+            const progress = Math.min(elapsedTime / duration, 1);
+            
+            const currentValue = Math.floor(progress * target);
+            element.textContent = currentValue;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            }
+        }
+        
+        requestAnimationFrame(updateCounter);
+    }
+
+    // Animate BMI when visible
+    const statNumbers = document.querySelectorAll('.stat-number');
+    const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const target = entry.target;
+                const value = parseFloat(target.textContent);
+                
+                if (!isNaN(value) && value > 0) {
+                    animateCounter(target, value);
+                    statsObserver.unobserve(target);
+                }
+            }
+        });
+    });
+
+    statNumbers.forEach(stat => {
+        const value = parseFloat(stat.textContent);
+        if (!isNaN(value) && value > 0) {
+            stat.textContent = '0';
+            statsObserver.observe(stat);
+        }
+    });
+
+    // Initialize animations on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add entrance animations
+        setTimeout(() => {
+            document.querySelectorAll('.animate-slide-up, .animate-fade-in').forEach((el, index) => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            });
+        }, 100);
+    });
+
+    // Form submission handling
+    document.getElementById('info-form').addEventListener('submit', function(e) {
+        const weight = document.getElementById('weight').value;
+        const height = document.getElementById('height').value;
+        
+        if (weight && height) {
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+            submitBtn.disabled = true;
+        }
+    });
+
+// Profile picture upload functionality
+const avatarContainer = document.getElementById('avatar-container');
+const profileAvatar = document.getElementById('profile-avatar');
+const imageUpload = document.getElementById('image-upload');
+const uploadPreview = document.getElementById('upload-preview');
+const uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
+const uploadSubmit = document.getElementById('upload-submit');
+const avatarForm = document.getElementById('avatar-form');
+
+// Click on avatar to open upload modal
+avatarContainer.addEventListener('click', () => {
+    uploadModal.show();
+});
+
+// Enhanced image preview with proper cropping
+imageUpload.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('Invalid file type. Please upload JPEG, PNG, GIF, or WebP images.', 'error');
+            this.value = '';
+            return;
+        }
+        
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            showNotification('File too large. Please upload images smaller than 5MB.', 'error');
+            this.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Create a new image to check dimensions
+            const img = new Image();
+            img.onload = function() {
+                // Ensure the preview maintains circular shape and proper sizing
+                uploadPreview.src = e.target.result;
+                
+                // Add loading animation
+                uploadPreview.style.opacity = '0.7';
+                setTimeout(() => {
+                    uploadPreview.style.opacity = '1';
+                }, 300);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        
+        // Enable upload button
+        uploadSubmit.disabled = false;
+    } else {
+        // Disable upload button if no file
+        uploadSubmit.disabled = true;
+    }
+});
+
+// Enhanced upload functionality
+uploadSubmit.addEventListener('click', function() {
+    const fileInput = document.getElementById('image-upload');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showNotification('Please select an image file first.', 'error');
+        return;
+    }
+    
+    // Show loading state
+    this.classList.add('loading');
+    this.innerHTML = 'Uploading...';
+    this.disabled = true;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    // Get CSRF token from the form
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('/upload_profile_image/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': csrfToken,
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Update the profile image with the new one
+            profileAvatar.src = data.image_url + '?t=' + new Date().getTime();
+            uploadPreview.src = data.image_url + '?t=' + new Date().getTime();
+            
+            // Close modal
+            const uploadModal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+            uploadModal.hide();
+            
+            // Show success notification
+            showNotification(data.message || 'Profile picture updated successfully!', 'success');
+        } else {
+            showNotification('Error: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Upload error:', error);
+        showNotification('An error occurred while uploading the image: ' + error.message, 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        uploadSubmit.classList.remove('loading');
+        uploadSubmit.innerHTML = 'Upload Picture';
+        uploadSubmit.disabled = false;
+    });
+});
+
+    // Show notification function
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} notification-icon"></i>
+            <div>${message}</div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+// Calculate BMI dynamically
+document.addEventListener('DOMContentLoaded', function() {
+    const weight = parseFloat('{{ user.weight|default:0 }}');
+    const height = parseFloat('{{ user.height|default:0 }}');
+    
+    if (weight && height) {
+        const heightInM = height / 100;
+        const bmi = weight / (heightInM * heightInM);
+        const bmiDisplay = document.getElementById('bmi-display');
+        const bmiStatusDisplay = document.getElementById('bmi-status-display');
+        
+        // Display BMI with one decimal place
+        bmiDisplay.textContent = bmi.toFixed(1);
+        
+        // Determine BMI status and apply color class
+        let status = '';
+        let statusClass = '';
+        
+        if (bmi < 18.5) {
+            status = 'Underweight';
+            statusClass = 'bmi-underweight';
+        } else if (bmi < 25) {
+            status = 'Normal';
+            statusClass = 'bmi-normal';
+        } else if (bmi < 30) {
+            status = 'Overweight';
+            statusClass = 'bmi-overweight';
+        } else {
+            status = 'Obese';
+            statusClass = 'bmi-obese';
+        }
+        
+        bmiStatusDisplay.textContent = status;
+        bmiStatusDisplay.className = 'stat-number ' + statusClass;
+        
+        // Animate the BMI counter
+        animateCounter(bmiDisplay, bmi);
+    }
+});
+
+function animateCounter(element, target) {
+    const start = 0;
+    const duration = 2000;
+    const startTime = performance.now();
+    
+    function updateCounter(currentTime) {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+        
+        const currentValue = (progress * target).toFixed(1);
+        element.textContent = currentValue;
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+        }
+    }
+    
+    requestAnimationFrame(updateCounter);
+}
+
+</script>
+{% endblock %}
